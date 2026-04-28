@@ -1,0 +1,35 @@
+{
+  "name": "vue-html-rich-text-editor",
+  "version": "0.1.0",
+  "description": "A simple HTML rich text editor component for Vue 3.",
+  "type": "module",
+  "files": ["dist"],
+  "main": "./dist/vue-html-rich-text-editor.umd.cjs",
+  "module": "./dist/vue-html-rich-text-editor.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vue-html-rich-text-editor.js",
+      "require": "./dist/vue-html-rich-text-editor.umd.cjs"
+    },
+    "./style.css": "./dist/vue-html-rich-text-editor.css"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "peerDependencies": {
+    "vue": "^3.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.2.0",
+    "vue": "^3.4.0",
+    "vue-tsc": "^2.0.0"
+  },
+  "keywords": ["vue", "vue3", "rich-text", "editor", "wysiwyg", "html"],
+  "license": "MIT"
+}

@@ -22,6 +22,7 @@ import TablePropsPanel from './table/TablePropsPanel.vue'
 import ImageTools from './image/ImageTools.vue'
 import FindReplaceDialog from './FindReplaceDialog.vue'
 import LinkPopover from './LinkPopover.vue'
+import ImageUrlDialog from './ImageUrlDialog.vue'
 
 const props = withDefaults(defineProps<{
   modelValue?: string
@@ -46,6 +47,7 @@ const charCount = ref(0)
 const pageCount = ref(1)
 const findReplaceVisible = ref(false)
 const linkPopover = ref<{ visible: boolean; top: number; left: number }>({ visible: false, top: 0, left: 0 })
+const imageUrlVisible = ref(false)
 
 function zoomIn()  { zoom.value = Math.min(200, zoom.value + 10) }
 function zoomOut() { zoom.value = Math.max(50,  zoom.value - 10) }
@@ -58,6 +60,10 @@ function openLinkPopover(payload: { rect: { top: number; left: number; bottom: n
     top: r.bottom + 10,
     left: Math.max(8, r.left)
   }
+}
+function openImageUrl() { imageUrlVisible.value = true }
+function onImageUrlSubmit(url: string) {
+  if (url) context.value?.insert.imageFromUrl(url)
 }
 
 const modelValue = toRef(props, 'modelValue')
@@ -330,6 +336,7 @@ const statusClasses = computed(() => `status floating ${status.value.kind} ${sta
       @toggle-fullscreen="toggleFullscreen"
       @open-find-replace="openFindReplace"
       @open-link="openLinkPopover"
+      @open-image-url="openImageUrl"
     />
 
     <FindReplaceDialog
@@ -344,6 +351,13 @@ const statusClasses = computed(() => `status floating ${status.value.kind} ${sta
       :top="linkPopover.top"
       :left="linkPopover.left"
       @close="linkPopover.visible = false"
+    />
+
+    <ImageUrlDialog
+      v-if="ready"
+      :visible="imageUrlVisible"
+      @close="imageUrlVisible = false"
+      @submit="onImageUrlSubmit"
     />
     <span :class="statusClasses">{{ status.msg }}</span>
 

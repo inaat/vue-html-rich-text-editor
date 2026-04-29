@@ -21,6 +21,7 @@ const emit = defineEmits<{
   (e: 'toggle-fullscreen'): void
   (e: 'open-find-replace'): void
   (e: 'open-link', payload: { rect: { top: number; left: number; bottom: number } }): void
+  (e: 'open-image-url'): void
 }>()
 
 const spellOn = ref(true)
@@ -43,14 +44,15 @@ function insertMath() {
 
 async function pickImage(ev: MouseEvent) {
   ctx.popup.showMenu(ev.currentTarget as HTMLElement, [
-    { label: 'Upload from device…', onClick: async () => {
+    { label: 'Upload from computer', icon: 'image', onClick: async () => {
       const f = await pickFile('image/*')
       if (f) await ctx.insert.imageFromFile(f)
     } },
-    { label: 'Insert from URL…', onClick: () => {
-      const url = prompt('Image URL:', 'https://')
-      if (url) ctx.insert.imageFromUrl(url)
-    } }
+    { label: 'Insert with file manager', icon: 'filemanager', onClick: async () => {
+      const f = await pickFile('image/*')
+      if (f) await ctx.insert.imageFromFile(f)
+    } },
+    { label: 'Insert via URL', icon: 'link', onClick: () => emit('open-image-url') }
   ])
 }
 

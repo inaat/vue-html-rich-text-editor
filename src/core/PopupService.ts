@@ -1,8 +1,11 @@
+import { ICONS } from '../icons/registry'
+
 export interface PopupItem {
   label?: string
   shortcut?: string
   separator?: boolean
   disabled?: boolean
+  icon?: string
   onClick?(): void
 }
 
@@ -25,6 +28,13 @@ export class PopupService {
       b.type = 'button'
       b.className = 'tb-menu-item'
       if (it.disabled) b.setAttribute('disabled', '')
+      if (it.icon && ICONS[it.icon]) {
+        const def = ICONS[it.icon]
+        const ico = document.createElement('span')
+        ico.className = 'tb-menu-icon'
+        ico.innerHTML = `<svg viewBox="${def.viewBox}" width="16" height="16" fill="currentColor" aria-hidden="true">${def.content}</svg>`
+        b.appendChild(ico)
+      }
       const label = document.createElement('span')
       label.className = 'tb-menu-label'
       label.textContent = it.label ?? ''

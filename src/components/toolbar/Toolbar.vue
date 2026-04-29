@@ -17,6 +17,7 @@ defineEmits<{
   (e: 'toggle-fullscreen'): void
   (e: 'open-find-replace'): void
   (e: 'open-link', payload: { rect: { top: number; left: number; bottom: number } }): void
+  (e: 'open-image-url'): void
 }>()
 
 const root = ref<HTMLDivElement | null>(null)
@@ -49,6 +50,7 @@ function openHeadingMenu() {
       @toggle-fullscreen="$emit('toggle-fullscreen')"
       @open-find-replace="$emit('open-find-replace')"
       @open-link="(p) => $emit('open-link', p)"
+      @open-image-url="$emit('open-image-url')"
     />
     <ToolbarRow2 />
   </div>

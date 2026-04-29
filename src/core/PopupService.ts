@@ -1,6 +1,9 @@
 export interface PopupItem {
-  label: string
-  onClick(): void
+  label?: string
+  shortcut?: string
+  separator?: boolean
+  disabled?: boolean
+  onClick?(): void
 }
 
 export class PopupService {
@@ -12,12 +15,32 @@ export class PopupService {
     const pop = document.createElement('div')
     pop.className = 'tb-popup tb-menu'
     for (const it of items) {
+      if (it.separator) {
+        const sep = document.createElement('div')
+        sep.className = 'tb-menu-sep'
+        pop.appendChild(sep)
+        continue
+      }
       const b = document.createElement('button')
       b.type = 'button'
       b.className = 'tb-menu-item'
-      b.textContent = it.label
+      if (it.disabled) b.setAttribute('disabled', '')
+      const label = document.createElement('span')
+      label.className = 'tb-menu-label'
+      label.textContent = it.label ?? ''
+      b.appendChild(label)
+      if (it.shortcut) {
+        const k = document.createElement('span')
+        k.className = 'tb-menu-shortcut'
+        k.textContent = it.shortcut
+        b.appendChild(k)
+      }
       b.addEventListener('mousedown', (e) => e.preventDefault())
-      b.addEventListener('click', () => { this.close(); it.onClick() })
+      b.addEventListener('click', () => {
+        if (it.disabled) return
+        this.close()
+        it.onClick?.()
+      })
       pop.appendChild(b)
     }
     this.position(pop, anchor)

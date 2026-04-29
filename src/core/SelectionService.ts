@@ -3,7 +3,7 @@ import { BLOCK_TAGS } from './Constants'
 export class SelectionService {
   private savedRange: Range | null = null
 
-  constructor(private root: HTMLElement) {}
+  constructor(public readonly root: HTMLElement) {}
 
   remember(): void {
     const sel = window.getSelection()

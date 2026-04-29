@@ -20,6 +20,8 @@ import TableTools from './table/TableTools.vue'
 import TableOverlay from './table/TableOverlay.vue'
 import TablePropsPanel from './table/TablePropsPanel.vue'
 import ImageTools from './image/ImageTools.vue'
+import FindReplaceDialog from './FindReplaceDialog.vue'
+import LinkPopover from './LinkPopover.vue'
 
 const props = withDefaults(defineProps<{
   modelValue?: string
@@ -37,6 +39,26 @@ const status = ref<{ msg: string; kind: '' | 'ok' | 'err' }>({ msg: '', kind: ''
 const meta = ref<DocumentMeta>({ ...EMPTY_META })
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const toolbarRef = ref<InstanceType<typeof Toolbar> | null>(null)
+const zoom = ref(100)
+const fullscreen = ref(false)
+const wordCount = ref(0)
+const charCount = ref(0)
+const pageCount = ref(1)
+const findReplaceVisible = ref(false)
+const linkPopover = ref<{ visible: boolean; top: number; left: number }>({ visible: false, top: 0, left: 0 })
+
+function zoomIn()  { zoom.value = Math.min(200, zoom.value + 10) }
+function zoomOut() { zoom.value = Math.max(50,  zoom.value - 10) }
+function toggleFullscreen() { fullscreen.value = !fullscreen.value }
+function openFindReplace() { findReplaceVisible.value = true }
+function openLinkPopover(payload: { rect: { top: number; left: number; bottom: number } }) {
+  const r = payload.rect
+  linkPopover.value = {
+    visible: true,
+    top: r.bottom + 10,
+    left: Math.max(8, r.left)
+  }
+}
 
 const modelValue = toRef(props, 'modelValue')
 
@@ -55,6 +77,16 @@ const { rootRef, sourceRef, context, ready } = useEditor({
 
 const bindRoot = (el: Element | null) => { rootRef.value = el as HTMLElement | null }
 const bindSource = (el: Element | null) => { sourceRef.value = el as HTMLElement | null }
+
+function recountStats() {
+  if (!rootRef.value) return
+  const text = (rootRef.value.innerText || '').trim()
+  wordCount.value = text ? text.split(/\s+/).length : 0
+  charCount.value = (rootRef.value.innerText || '').length
+  pageCount.value = Math.max(1, rootRef.value.querySelectorAll('.pagebreak').length + 1)
+}
+
+watch(() => context.value, (c) => { if (c) recountStats() })
 
 provideEditorContext(new Proxy({} as any, {
   get(_t, key) { return (context.value as any)?.[key] }
@@ -277,7 +309,7 @@ const statusClasses = computed(() => `status floating ${status.value.kind} ${sta
 </script>
 
 <template>
-  <div class="rte-root">
+  <div class="rte-root" :class="{ 'is-fullscreen': fullscreen }" :style="{ '--rte-zoom': zoom / 100 }">
     <input
       ref="fileInputRef"
       type="file"
@@ -287,7 +319,32 @@ const statusClasses = computed(() => `status floating ${status.value.kind} ${sta
       @change="onFileChange"
     />
 
-    <Toolbar ref="toolbarRef" @toggle-source="toggleSource" @import-files="importFiles" />
+    <Toolbar
+      ref="toolbarRef"
+      :zoom="zoom"
+      :fullscreen="fullscreen"
+      @toggle-source="toggleSource"
+      @import-files="importFiles"
+      @zoom-in="zoomIn"
+      @zoom-out="zoomOut"
+      @toggle-fullscreen="toggleFullscreen"
+      @open-find-replace="openFindReplace"
+      @open-link="openLinkPopover"
+    />
+
+    <FindReplaceDialog
+      v-if="ready"
+      :visible="findReplaceVisible"
+      @close="findReplaceVisible = false"
+    />
+
+    <LinkPopover
+      v-if="ready"
+      :visible="linkPopover.visible"
+      :top="linkPopover.top"
+      :left="linkPopover.left"
+      @close="linkPopover.visible = false"
+    />
     <span :class="statusClasses">{{ status.msg }}</span>
 
     <BubbleToolbar
@@ -355,10 +412,23 @@ const statusClasses = computed(() => `status floating ${status.value.kind} ${sta
       @edit-mouseup="onEditorMouseup"
       @edit-click="onEditorClick"
       @edit-keydown="onEditorKeydown"
+      @edit-input="recountStats"
     >
       <template #sidebar>
         <Sidebar v-if="ready" :meta="meta" />
       </template>
     </EditorPane>
+
+    <div class="statusbar">
+      <span class="sb-dot" />
+      <span>Ready</span>
+      <span class="sb-div" />
+      <span>Words: {{ wordCount }}</span>
+      <span>Characters: {{ charCount }}</span>
+      <span class="sb-div" />
+      <span>{{ pageCount }} {{ pageCount === 1 ? 'page' : 'pages' }}</span>
+      <span class="sb-spacer" />
+      <span class="sb-branding">✓ </span>
+    </div>
   </div>
 </template>

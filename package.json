@@ -1,7 +1,7 @@
 {
   "name": "vue-html-rich-text-editor",
-  "version": "0.1.0",
-  "description": "A simple HTML rich text editor component for Vue 3.",
+  "version": "0.2.0",
+  "description": "A Vue 3 rich text / HTML document editor : menubar, dual toolbar rows, page-aware canvas, merge fields, footnotes, bookmarks, emoji, table of contents, templates, to-do lists, multi-level lists, case-change, find & replace, zoom, fullscreen and status bar.",
   "type": "module",
   "files": ["dist"],
   "main": "./dist/vue-html-rich-text-editor.umd.cjs",
@@ -30,6 +30,11 @@
     "vue": "^3.4.0",
     "vue-tsc": "^2.0.0"
   },
-  "keywords": ["vue", "vue3", "rich-text", "editor", "wysiwyg", "html"],
+  "keywords": [
+    "vue", "vue3", "rich-text", "editor", "wysiwyg", "html",
+    "docx", "merge-field", "footnote", "bookmark", "emoji",
+    "toc", "templates", "todo-list", "case-change", "",
+    "zatca", "page-editor", "fullscreen"
+  ],
   "license": "MIT"
 }

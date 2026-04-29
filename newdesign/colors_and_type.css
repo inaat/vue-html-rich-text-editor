@@ -1,0 +1,340 @@
+/*
+ *  Design System — Tokens
+ * colors_and_type.css
+ *
+ * Import IBM Plex Sans, IBM Plex Arabic, IBM Plex Mono from Google Fonts:
+ * @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+ */
+
+/* ─────────────────────────────────────────────
+   COLOR PALETTE
+───────────────────────────────────────────── */
+
+:root {
+
+  /* Brand — Emerald Green (Primary) */
+  --color-green-50:  #E8F5EE;
+  --color-green-100: #C6E8D5;
+  --color-green-200: #9DD4B5;
+  --color-green-300: #6ABF90;
+  --color-green-400: #3EAA6E;
+  --color-green-500: #1A9155;
+  --color-green-600: #0D6B45;   /* Primary */
+  --color-green-700: #095934;
+  --color-green-800: #064626;
+  --color-green-900: #033218;
+
+  /* Accent — Amber Gold */
+  --color-amber-50:  #FEF6E8;
+  --color-amber-100: #FCE5BC;
+  --color-amber-200: #F9CF88;
+  --color-amber-300: #F5B34D;
+  --color-amber-400: #E89B26;
+  --color-amber-500: #D97B20;   /* Accent */
+  --color-amber-600: #B86318;
+  --color-amber-700: #924C11;
+  --color-amber-800: #6C360A;
+  --color-amber-900: #4A2305;
+
+  /* Neutral — Cool Slate */
+  --color-neutral-0:   #FFFFFF;
+  --color-neutral-50:  #F5F6F8;
+  --color-neutral-100: #EAEDF1;
+  --color-neutral-200: #E4E7EC;
+  --color-neutral-300: #CBD2DA;
+  --color-neutral-400: #9AA3AE;
+  --color-neutral-500: #6B7585;
+  --color-neutral-600: #4B5461;
+  --color-neutral-700: #343D49;
+  --color-neutral-800: #1F2733;
+  --color-neutral-900: #0F151E;
+
+  /* Semantic — Success */
+  --color-success-50:  #F0FDF4;
+  --color-success-100: #DCFCE7;
+  --color-success-500: #16A34A;
+  --color-success-600: #15803D;
+  --color-success-700: #166534;
+
+  /* Semantic — Warning */
+  --color-warning-50:  #FFFBEB;
+  --color-warning-100: #FEF3C7;
+  --color-warning-500: #D97B20;
+  --color-warning-600: #B86318;
+
+  /* Semantic — Error */
+  --color-error-50:  #FEF2F2;
+  --color-error-100: #FEE2E2;
+  --color-error-500: #DC2626;
+  --color-error-600: #B91C1C;
+  --color-error-700: #991B1B;
+
+  /* Semantic — Info */
+  --color-info-50:  #EFF6FF;
+  --color-info-100: #DBEAFE;
+  --color-info-500: #2563EB;
+  --color-info-600: #1D4ED8;
+
+  /* ─────────────────────────────────────────────
+     SEMANTIC ALIASES
+  ───────────────────────────────────────────── */
+
+  /* Foreground / Text */
+  --fg1: var(--color-neutral-900);     /* Primary text */
+  --fg2: var(--color-neutral-700);     /* Secondary text */
+  --fg3: var(--color-neutral-500);     /* Tertiary / placeholder */
+  --fg4: var(--color-neutral-400);     /* Disabled text */
+  --fg-inverse: var(--color-neutral-0);
+
+  /* Background */
+  --bg-app:     var(--color-neutral-50);   /* App shell */
+  --bg-surface: var(--color-neutral-0);    /* Cards, panels */
+  --bg-subtle:  var(--color-neutral-100);  /* Hover, table stripe */
+  --bg-overlay: rgba(15, 21, 30, 0.45);   /* Modal scrim */
+
+  /* Border */
+  --border-default: var(--color-neutral-200);
+  --border-strong:  var(--color-neutral-300);
+  --border-focus:   var(--color-green-600);
+
+  /* Brand semantic */
+  --color-primary:       var(--color-green-600);
+  --color-primary-hover: var(--color-green-700);
+  --color-primary-light: var(--color-green-50);
+  --color-accent:        var(--color-amber-500);
+  --color-accent-hover:  var(--color-amber-600);
+
+  /* ─────────────────────────────────────────────
+     TYPOGRAPHY
+  ───────────────────────────────────────────── */
+
+  /* Font Families */
+  --font-sans:   'IBM Plex Sans', 'IBM Plex Arabic', system-ui, sans-serif;
+  --font-arabic: 'IBM Plex Arabic', 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono:   'IBM Plex Mono', 'Courier New', monospace;
+
+  /* Font Weights */
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+
+  /* Font Size Scale */
+  --text-2xs:  11px;
+  --text-xs:   12px;
+  --text-sm:   13px;
+  --text-base: 14px;
+  --text-md:   16px;
+  --text-lg:   18px;
+  --text-xl:   20px;
+  --text-2xl:  24px;
+  --text-3xl:  30px;
+  --text-4xl:  36px;
+  --text-5xl:  48px;
+
+  /* Line Heights */
+  --lh-tight:  1.2;
+  --lh-snug:   1.35;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.65;
+
+  /* Letter Spacing */
+  --ls-tight:  -0.02em;
+  --ls-snug:   -0.01em;
+  --ls-normal:  0em;
+  --ls-wide:    0.02em;
+  --ls-wider:   0.05em;
+  --ls-widest:  0.1em;
+
+  /* ─────────────────────────────────────────────
+     SEMANTIC TYPE ROLES
+  ───────────────────────────────────────────── */
+
+  /* Display / Hero headings */
+  --type-display-font:    var(--font-sans);
+  --type-display-weight:  var(--fw-bold);
+  --type-display-size:    var(--text-5xl);
+  --type-display-lh:      var(--lh-tight);
+  --type-display-ls:      var(--ls-tight);
+
+  /* H1 */
+  --type-h1-size:    var(--text-4xl);
+  --type-h1-weight:  var(--fw-bold);
+  --type-h1-lh:      var(--lh-tight);
+  --type-h1-ls:      var(--ls-snug);
+
+  /* H2 */
+  --type-h2-size:    var(--text-3xl);
+  --type-h2-weight:  var(--fw-semibold);
+  --type-h2-lh:      var(--lh-snug);
+  --type-h2-ls:      var(--ls-snug);
+
+  /* H3 */
+  --type-h3-size:    var(--text-2xl);
+  --type-h3-weight:  var(--fw-semibold);
+  --type-h3-lh:      var(--lh-snug);
+  --type-h3-ls:      var(--ls-normal);
+
+  /* H4 */
+  --type-h4-size:    var(--text-xl);
+  --type-h4-weight:  var(--fw-semibold);
+  --type-h4-lh:      var(--lh-normal);
+  --type-h4-ls:      var(--ls-normal);
+
+  /* H5 */
+  --type-h5-size:    var(--text-lg);
+  --type-h5-weight:  var(--fw-semibold);
+  --type-h5-lh:      var(--lh-normal);
+
+  /* Body */
+  --type-body-size:   var(--text-base);
+  --type-body-weight: var(--fw-regular);
+  --type-body-lh:     var(--lh-normal);
+
+  /* Body Large */
+  --type-body-lg-size: var(--text-md);
+  --type-body-lg-lh:   var(--lh-relaxed);
+
+  /* Small / Caption */
+  --type-small-size:   var(--text-sm);
+  --type-small-weight: var(--fw-regular);
+  --type-small-lh:     var(--lh-normal);
+
+  /* Label (UI labels, buttons) */
+  --type-label-size:   var(--text-sm);
+  --type-label-weight: var(--fw-medium);
+  --type-label-ls:     var(--ls-wide);
+
+  /* Code / Mono */
+  --type-code-font:   var(--font-mono);
+  --type-code-size:   var(--text-sm);
+  --type-code-weight: var(--fw-regular);
+
+  /* ─────────────────────────────────────────────
+     SPACING SCALE
+  ───────────────────────────────────────────── */
+
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Component padding shorthands */
+  --padding-compact: var(--space-2) var(--space-3);   /* 8px 12px */
+  --padding-default: var(--space-3) var(--space-4);   /* 12px 16px */
+  --padding-relaxed: var(--space-4) var(--space-6);   /* 16px 24px */
+
+  /* ─────────────────────────────────────────────
+     BORDER RADIUS
+  ───────────────────────────────────────────── */
+
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   8px;   /* Default card / input */
+  --radius-xl:  12px;   /* Modals, drawers */
+  --radius-2xl: 16px;
+  --radius-full: 9999px; /* Pills */
+
+  /* ─────────────────────────────────────────────
+     SHADOWS / ELEVATION
+  ───────────────────────────────────────────── */
+
+  --shadow-none: none;
+  --shadow-xs:   0 1px 2px rgba(15, 21, 30, 0.06);
+  --shadow-sm:   0 1px 3px rgba(15, 21, 30, 0.08), 0 1px 2px rgba(15, 21, 30, 0.04);
+  --shadow-md:   0 4px 12px rgba(15, 21, 30, 0.10), 0 1px 4px rgba(15, 21, 30, 0.06);
+  --shadow-lg:   0 8px 24px rgba(15, 21, 30, 0.12), 0 2px 8px rgba(15, 21, 30, 0.06);
+  --shadow-xl:   0 16px 40px rgba(15, 21, 30, 0.14), 0 4px 12px rgba(15, 21, 30, 0.08);
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 3px rgba(13, 107, 69, 0.25);
+
+  /* ─────────────────────────────────────────────
+     TRANSITIONS
+  ───────────────────────────────────────────── */
+
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+
+  --duration-fast:   100ms;
+  --duration-micro:  150ms;
+  --duration-base:   250ms;
+  --duration-slow:   350ms;
+
+  --transition-base: var(--duration-micro) var(--ease-standard);
+  --transition-slow: var(--duration-base) var(--ease-standard);
+
+  /* ─────────────────────────────────────────────
+     LAYOUT
+  ───────────────────────────────────────────── */
+
+  --sidebar-width: 240px;
+  --topbar-height: 60px;
+  --content-max:   1280px;
+  --content-md:    960px;
+  --content-sm:    640px;
+}
+
+/* ─────────────────────────────────────────────
+   BASE RESETS + GLOBAL STYLES
+───────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+  color: var(--fg1);
+  background: var(--bg-app);
+}
+
+/* RTL override */
+[dir="rtl"] body,
+[dir="rtl"] {
+  font-family: var(--font-arabic);
+}
+
+/* ─────────────────────────────────────────────
+   SEMANTIC TYPE CLASSES
+───────────────────────────────────────────── */
+
+.display {
+  font-size: var(--type-display-size);
+  font-weight: var(--type-display-weight);
+  line-height: var(--type-display-lh);
+  letter-spacing: var(--type-display-ls);
+}
+.h1 { font-size: var(--type-h1-size); font-weight: var(--type-h1-weight); line-height: var(--type-h1-lh); letter-spacing: var(--type-h1-ls); }
+.h2 { font-size: var(--type-h2-size); font-weight: var(--type-h2-weight); line-height: var(--type-h2-lh); letter-spacing: var(--type-h2-ls); }
+.h3 { font-size: var(--type-h3-size); font-weight: var(--type-h3-weight); line-height: var(--type-h3-lh); }
+.h4 { font-size: var(--type-h4-size); font-weight: var(--type-h4-weight); line-height: var(--type-h4-lh); }
+.h5 { font-size: var(--type-h5-size); font-weight: var(--type-h5-weight); }
+.body-lg { font-size: var(--type-body-lg-size); line-height: var(--type-body-lg-lh); }
+.body    { font-size: var(--type-body-size);    line-height: var(--type-body-lh); }
+.small   { font-size: var(--type-small-size);   line-height: var(--type-small-lh); }
+.label   { font-size: var(--type-label-size);   font-weight: var(--type-label-weight); letter-spacing: var(--type-label-ls); }
+.mono    { font-family: var(--font-mono);       font-size: var(--type-code-size); }
+.caption { font-size: var(--text-xs); color: var(--fg3); line-height: var(--lh-normal); }

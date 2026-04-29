@@ -6,7 +6,7 @@ const props = withDefaults(defineProps<{
   name: string
   size?: number | string
 }>(), {
-  size: 18
+  size: 16
 })
 
 const icon = computed(() => ICONS[props.name])
@@ -19,25 +19,15 @@ const icon = computed(() => ICONS[props.name])
     :viewBox="icon.viewBox"
     :width="size"
     :height="size"
+    fill="currentColor"
     aria-hidden="true"
     focusable="false"
-  >
-    <path
-      v-for="(p, i) in icon.paths"
-      :key="i"
-      :d="p.d"
-      :fill="p.fill ?? 'none'"
-      :stroke="p.stroke ?? 'none'"
-      stroke-width="1.5"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      :transform="p.transform"
-    />
-  </svg>
+    v-html="icon.content"
+  />
   <span v-else class="rte__icon-fallback">{{ name }}</span>
 </template>
 
 <style scoped>
-.rte__icon { display: inline-block; vertical-align: middle; }
+.rte__icon { display: inline-block; vertical-align: middle; flex-shrink: 0; pointer-events: none; }
 .rte__icon-fallback { font-size: 11px; opacity: 0.6; }
 </style>

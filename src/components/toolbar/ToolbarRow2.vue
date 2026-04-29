@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useEditorContext } from '../../composables/useEditorContext'
 import ToolbarButton from '../ToolbarButton.vue'
 import CkDropdown from './ck-dropdown.vue'
@@ -26,9 +26,30 @@ const styleSel = ref('')
 const currentLineHeight = ref('')
 const tplSel = ref('')
 
+const BLOCK_TAGS: Record<string, string> = {
+  H1: 'h1', H2: 'h2', H3: 'h3', H4: 'h4', H5: 'h5', H6: 'h6',
+  BLOCKQUOTE: 'blockquote', PRE: 'pre',
+}
+
+function detectBlock() {
+  const sel = window.getSelection()
+  if (!sel || !sel.rangeCount) return
+  const node = sel.anchorNode
+  if (!node || !ctx.root.contains(node)) return
+  let el: HTMLElement | null = node.nodeType === Node.TEXT_NODE ? node.parentElement : node as HTMLElement
+  while (el && el !== ctx.root) {
+    const tag = BLOCK_TAGS[el.tagName]
+    if (tag) { block.value = tag; return }
+    el = el.parentElement
+  }
+  block.value = ''
+}
+
+onMounted(() => document.addEventListener('selectionchange', detectBlock))
+onUnmounted(() => document.removeEventListener('selectionchange', detectBlock))
+
 function applyBlock() {
   if (block.value) ctx.engine.exec('formatBlock', block.value)
-  block.value = ''
 }
 function applyStyle() {
   const v = styleSel.value

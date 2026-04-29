@@ -2,8 +2,11 @@
 import { ref } from 'vue'
 import { useEditorContext } from '../../composables/useEditorContext'
 import ToolbarButton from '../ToolbarButton.vue'
+import CkDropdown from './ck-dropdown.vue'
+import type { DropdownItem } from './ck-dropdown.vue'
 
 const ctx = useEditorContext()
+const basicDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 
 const block = ref('')
 const styleSel = ref('')
@@ -90,16 +93,19 @@ function applyBasic(kind: string) {
     case 'bold':      ctx.engine.exec('bold'); break
   }
 }
+const basicItems: DropdownItem[] = [
+  { label: 'Bold',          icon: 'bold',          shortcut: 'Ctrl+B',       onClick: () => applyBasic('bold') },
+  { label: 'Italic',        icon: 'italic',        shortcut: 'Ctrl+I',       onClick: () => applyBasic('italic') },
+  { label: 'Underline',     icon: 'underline',     shortcut: 'Ctrl+U',       onClick: () => applyBasic('underline') },
+  { label: 'Strikethrough', icon: 'strikethrough', shortcut: 'Ctrl+Shift+X', onClick: () => applyBasic('strike') },
+  { label: 'Inline Code',   icon: 'code',                                    onClick: () => applyBasic('code') },
+  { label: 'Superscript',   icon: 'superscript',   shortcut: 'Ctrl+.',       onClick: () => applyBasic('sup') },
+  { label: 'Subscript',     icon: 'subscript',     shortcut: 'Ctrl+,',       onClick: () => applyBasic('sub') },
+]
+
 function pickBasic(ev: MouseEvent) {
-  ctx.popup.showMenu(ev.currentTarget as HTMLElement, [
-    { label: 'Superscript (Ctrl+.)', onClick: () => applyBasic('sup') },
-    { label: 'Subscript (Ctrl+,)',   onClick: () => applyBasic('sub') },
-    { label: 'Inline Code',          onClick: () => applyBasic('code') },
-    { label: 'Strikethrough',        onClick: () => applyBasic('strike') },
-    { label: 'Underline',            onClick: () => applyBasic('underline') },
-    { label: 'Italic',               onClick: () => applyBasic('italic') },
-    { label: 'Bold',                 onClick: () => applyBasic('bold') }
-  ])
+  const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect()
+  basicDropdown.value?.openAt(rect.left, rect.bottom + 2)
 }
 
 function applyTemplate() {
@@ -135,8 +141,8 @@ function applyTemplate() {
     <ToolbarButton icon="italic" title="Italic (Ctrl+I)" @invoke="ctx.engine.exec('italic')" />
     <ToolbarButton icon="underline" title="Underline (Ctrl+U)" @invoke="ctx.engine.exec('underline')" />
     <ToolbarButton icon="strikethrough" title="Strikethrough (Ctrl+Shift+X)" @invoke="ctx.engine.exec('strikeThrough')" />
-    <ToolbarButton icon="basicstyles" title="Basic styles" has-arrow @invoke="pickBasic" />
-    <span class="tb-sep" />
+    <ToolbarButton icon="basic_styles" title="Basic styles" has-arrow @invoke="pickBasic" />
+    <CkDropdown ref="basicDropdown" :items="basicItems" />
 
     <ToolbarButton icon="removeformat" title="Remove Format" @invoke="ctx.engine.exec('removeFormat')" />
     <span class="tb-sep" />

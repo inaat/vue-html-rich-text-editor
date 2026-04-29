@@ -6,13 +6,14 @@ import CkDropdown from './ck-dropdown.vue'
 import type { DropdownItem } from './ck-dropdown.vue'
 import CkColorPicker from './ck-color-picker.vue'
 import CkHighlightPicker from './ck-highlight-picker.vue'
+import CkListPicker from './ck-list-picker.vue'
 
 const ctx = useEditorContext()
 const basicDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const alignDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const lineHeightDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const bulletDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
-const orderedDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
+const listPickerEl = ref<InstanceType<typeof CkListPicker> | null>(null)
 const colorPickerEl = ref<InstanceType<typeof CkColorPicker> | null>(null)
 const highlightPickerEl = ref<InstanceType<typeof CkHighlightPicker> | null>(null)
 
@@ -101,20 +102,13 @@ const bulletItems: DropdownItem[] = [
   { label: 'Circle', icon: 'list-circle', onClick: () => applyList('ul', 'circle') },
   { label: 'Square', icon: 'list-square', onClick: () => applyList('ul', 'square') },
 ]
-const orderedItems: DropdownItem[] = [
-  { label: '1. Decimal',     onClick: () => applyList('ol', 'decimal') },
-  { label: 'a. Lower Alpha', onClick: () => applyList('ol', 'lower-alpha') },
-  { label: 'A. Upper Alpha', onClick: () => applyList('ol', 'upper-alpha') },
-  { label: 'i. Lower Roman', onClick: () => applyList('ol', 'lower-roman') },
-  { label: 'I. Upper Roman', onClick: () => applyList('ol', 'upper-roman') },
-]
 function pickBullet(ev: MouseEvent) {
   const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect()
   bulletDropdown.value?.openAt(rect.left, rect.bottom + 2)
 }
 function pickOrdered(ev: MouseEvent) {
   const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect()
-  orderedDropdown.value?.openAt(rect.left, rect.bottom + 2)
+  listPickerEl.value?.openAt(rect.left, rect.bottom + 2)
 }
 
 function applyBasic(kind: string) {
@@ -247,7 +241,7 @@ function applyTemplate() {
     <ToolbarButton icon="bulletlist" title="Bulleted list" has-arrow @invoke="pickBullet" />
     <CkDropdown ref="bulletDropdown" :items="bulletItems" />
     <ToolbarButton icon="numberedlist" title="Numbered list" has-arrow @invoke="pickOrdered" />
-    <CkDropdown ref="orderedDropdown" :items="orderedItems" />
+    <CkListPicker ref="listPickerEl" @pick="(style) => applyList('ol', style)" />
     <ToolbarButton icon="multilevel" title="Multi-level list" @invoke="ctx.insert.multiLevelList()" />
     <ToolbarButton icon="todolist" title="To-do list" @invoke="ctx.insert.todoList()" />
     <span class="tb-sep" />

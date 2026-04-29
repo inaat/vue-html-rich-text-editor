@@ -5,10 +5,12 @@ import ToolbarButton from '../ToolbarButton.vue'
 import CkDropdown from './ck-dropdown.vue'
 import type { DropdownItem } from './ck-dropdown.vue'
 import CkColorPicker from './ck-color-picker.vue'
+import CkHighlightPicker from './ck-highlight-picker.vue'
 
 const ctx = useEditorContext()
 const basicDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const colorPickerEl = ref<InstanceType<typeof CkColorPicker> | null>(null)
+const highlightPickerEl = ref<InstanceType<typeof CkHighlightPicker> | null>(null)
 
 let lastPickerRect = { left: 0, bottom: 0 }
 
@@ -128,7 +130,7 @@ const basicItems: DropdownItem[] = [
   { label: 'Font Size',     icon: 'font_size',     children: fontSizeChildren,   onClick: () => {} },
   { label: 'Font Family',   icon: 'font_family',   children: fontFamilyChildren, onClick: () => {} },
     { label: 'Font Color',    icon: 'font_color',    arrow: true, onClick: () => colorPickerEl.value?.openAt(lastPickerRect.left, lastPickerRect.bottom + 2, 'foreColor') },
-  { label: 'Highlight',     icon: 'remove_color',  arrow: true, onClick: () => colorPickerEl.value?.openAt(lastPickerRect.left, lastPickerRect.bottom + 2, 'hiliteColor') },
+  { label: 'Highlight',     icon: 'remove_color',  arrow: true, onClick: () => highlightPickerEl.value?.openAt(lastPickerRect.left, lastPickerRect.bottom + 2) },
 
   { label: 'Italic',        icon: 'italic',        shortcut: 'Ctrl+I',           onClick: () => applyBasic('italic') },
   { label: 'Underline',     icon: 'underline',     shortcut: 'Ctrl+U',           onClick: () => applyBasic('underline') },
@@ -181,6 +183,7 @@ function applyTemplate() {
     <CkDropdown ref="basicDropdown" :items="basicItems" />
 
     <CkColorPicker ref="colorPickerEl" />
+    <CkHighlightPicker ref="highlightPickerEl" />
 
     <ToolbarButton icon="removeformat" title="Remove Format" @invoke="ctx.engine.exec('removeFormat')" />
     <span class="tb-sep" />

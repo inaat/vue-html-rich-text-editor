@@ -7,6 +7,7 @@ import type { DropdownItem } from './ck-dropdown.vue'
 import CkColorPicker from './ck-color-picker.vue'
 import CkHighlightPicker from './ck-highlight-picker.vue'
 import CkListPicker from './ck-list-picker.vue'
+import CkMultilevelPicker from './ck-multilevel-picker.vue'
 
 const ctx = useEditorContext()
 const basicDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
@@ -14,6 +15,7 @@ const alignDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const lineHeightDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const bulletDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const listPickerEl = ref<InstanceType<typeof CkListPicker> | null>(null)
+const multilevelPickerEl = ref<InstanceType<typeof CkMultilevelPicker> | null>(null)
 const colorPickerEl = ref<InstanceType<typeof CkColorPicker> | null>(null)
 const highlightPickerEl = ref<InstanceType<typeof CkHighlightPicker> | null>(null)
 
@@ -178,6 +180,15 @@ function pickBasic(ev: MouseEvent) {
   basicDropdown.value?.openAt(rect.left, rect.bottom + 2)
 }
 
+function applyMultiLevel(l1: string, l2: string, l3: string) {
+  const html = `<ol style="list-style-type:${l1}"><li>Item 1<ol style="list-style-type:${l2}"><li>Item 1.1<ol style="list-style-type:${l3}"><li>Item 1.1.1</li></ol></li></ol></li><li>Item 2</li></ol>`
+  ctx.insert.htmlAtCursor(html)
+}
+function pickMultiLevel(ev: MouseEvent) {
+  const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect()
+  multilevelPickerEl.value?.openAt(rect.left, rect.bottom + 2)
+}
+
 function applyTemplate() {
   if (tplSel.value) ctx.insert.template(tplSel.value)
   tplSel.value = ''
@@ -242,7 +253,8 @@ function applyTemplate() {
     <CkDropdown ref="bulletDropdown" :items="bulletItems" />
     <ToolbarButton icon="numberedlist" title="Numbered list" has-arrow @invoke="pickOrdered" />
     <CkListPicker ref="listPickerEl" @pick="(style) => applyList('ol', style)" />
-    <ToolbarButton icon="multilevel" title="Multi-level list" @invoke="ctx.insert.multiLevelList()" />
+    <ToolbarButton icon="multilevel" title="Multi-level list" has-arrow @invoke="pickMultiLevel" />
+    <CkMultilevelPicker ref="multilevelPickerEl" @pick="(l1, l2, l3) => applyMultiLevel(l1, l2, l3)" />
     <ToolbarButton icon="todolist" title="To-do list" @invoke="ctx.insert.todoList()" />
     <span class="tb-sep" />
 

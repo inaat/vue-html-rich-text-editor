@@ -10,7 +10,6 @@ const basicDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 
 const block = ref('')
 const styleSel = ref('')
-const fontSize = ref('')
 const align = ref('')
 const lineHeight = ref('')
 const bullet = ref('')
@@ -34,9 +33,9 @@ function applyStyle() {
   }
   styleSel.value = ''
 }
-function applyFontSize() {
-  if (fontSize.value) ctx.engine.exec('fontSize', fontSize.value)
-  fontSize.value = ''
+function applyFontSize(size: string) {
+  if (size) ctx.engine.exec('fontSize', size)
+  else document.execCommand('removeFormat')
 }
 function applyAlign() {
   if (align.value) ctx.engine.exec(align.value)
@@ -93,8 +92,20 @@ function applyBasic(kind: string) {
     case 'bold':      ctx.engine.exec('bold'); break
   }
 }
+const fontSizeChildren: DropdownItem[] = [
+  { label: '10',      style: 'font-size:10px', onClick: () => applyFontSize('10') },
+  { label: '12',      style: 'font-size:12px', onClick: () => applyFontSize('12') },
+  { label: '14',      style: 'font-size:14px', onClick: () => applyFontSize('14') },
+  { label: 'Default',                          onClick: () => applyFontSize('') },
+  { label: '18',      style: 'font-size:18px', onClick: () => applyFontSize('18') },
+  { label: '20',      style: 'font-size:20px', onClick: () => applyFontSize('20') },
+  { label: '22',      style: 'font-size:22px', onClick: () => applyFontSize('22') },
+  { label: '24',      style: 'font-size:24px', onClick: () => applyFontSize('24') },
+  { label: '36',      style: 'font-size:36px', onClick: () => applyFontSize('36') },
+]
+
 const basicItems: DropdownItem[] = [
-  { label: 'Bold',          icon: 'bold',          shortcut: 'Ctrl+B',       onClick: () => applyBasic('bold') },
+  { label: 'Font Size',  icon: 'font_size', children: fontSizeChildren, onClick: () => {} },
   { label: 'Italic',        icon: 'italic',        shortcut: 'Ctrl+I',       onClick: () => applyBasic('italic') },
   { label: 'Underline',     icon: 'underline',     shortcut: 'Ctrl+U',       onClick: () => applyBasic('underline') },
   { label: 'Strikethrough', icon: 'strikethrough', shortcut: 'Ctrl+Shift+X', onClick: () => applyBasic('strike') },
@@ -164,17 +175,7 @@ function applyTemplate() {
     </select>
     <span class="tb-sep" />
 
-    <select v-model="fontSize" class="tb-sel narrow" title="Font size" @change="applyFontSize">
-      <option value="">Aa</option>
-      <option value="1">8</option>
-      <option value="2">10</option>
-      <option value="3">12</option>
-      <option value="4">14</option>
-      <option value="5">18</option>
-      <option value="6">24</option>
-      <option value="7">36</option>
-    </select>
-    <span class="tb-sep" />
+ 
 
     <select v-model="tplSel" class="tb-sel" title="Insert template" @change="applyTemplate">
       <option value="">Templates</option>

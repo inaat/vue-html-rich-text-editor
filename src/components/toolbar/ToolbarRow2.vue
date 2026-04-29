@@ -4,9 +4,13 @@ import { useEditorContext } from '../../composables/useEditorContext'
 import ToolbarButton from '../ToolbarButton.vue'
 import CkDropdown from './ck-dropdown.vue'
 import type { DropdownItem } from './ck-dropdown.vue'
+import CkColorPicker from './ck-color-picker.vue'
 
 const ctx = useEditorContext()
 const basicDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
+const colorPickerEl = ref<InstanceType<typeof CkColorPicker> | null>(null)
+
+let lastPickerRect = { left: 0, bottom: 0 }
 
 const block = ref('')
 const styleSel = ref('')
@@ -121,18 +125,22 @@ const fontFamilyChildren: DropdownItem[] = [
 ]
 
 const basicItems: DropdownItem[] = [
-  { label: 'Font Size',   icon: 'font_size',   children: fontSizeChildren,   onClick: () => {} },
-  { label: 'Font Family', icon: 'font_family', children: fontFamilyChildren, onClick: () => {} },
-  { label: 'Italic',        icon: 'italic',        shortcut: 'Ctrl+I',       onClick: () => applyBasic('italic') },
-  { label: 'Underline',     icon: 'underline',     shortcut: 'Ctrl+U',       onClick: () => applyBasic('underline') },
-  { label: 'Strikethrough', icon: 'strikethrough', shortcut: 'Ctrl+Shift+X', onClick: () => applyBasic('strike') },
-  { label: 'Inline Code',   icon: 'code',                                    onClick: () => applyBasic('code') },
-  { label: 'Superscript',   icon: 'superscript',   shortcut: 'Ctrl+.',       onClick: () => applyBasic('sup') },
-  { label: 'Subscript',     icon: 'subscript',     shortcut: 'Ctrl+,',       onClick: () => applyBasic('sub') },
+  { label: 'Font Size',     icon: 'font_size',     children: fontSizeChildren,   onClick: () => {} },
+  { label: 'Font Family',   icon: 'font_family',   children: fontFamilyChildren, onClick: () => {} },
+    { label: 'Font Color',    icon: 'font_color',    arrow: true, onClick: () => colorPickerEl.value?.openAt(lastPickerRect.left, lastPickerRect.bottom + 2, 'foreColor') },
+  { label: 'Highlight',     icon: 'remove_color',  arrow: true, onClick: () => colorPickerEl.value?.openAt(lastPickerRect.left, lastPickerRect.bottom + 2, 'hiliteColor') },
+
+  { label: 'Italic',        icon: 'italic',        shortcut: 'Ctrl+I',           onClick: () => applyBasic('italic') },
+  { label: 'Underline',     icon: 'underline',     shortcut: 'Ctrl+U',           onClick: () => applyBasic('underline') },
+  { label: 'Strikethrough', icon: 'strikethrough', shortcut: 'Ctrl+Shift+X',     onClick: () => applyBasic('strike') },
+  { label: 'Inline Code',   icon: 'code',                                         onClick: () => applyBasic('code') },
+  { label: 'Superscript',   icon: 'superscript',   shortcut: 'Ctrl+.',            onClick: () => applyBasic('sup') },
+  { label: 'Subscript',     icon: 'subscript',     shortcut: 'Ctrl+,',            onClick: () => applyBasic('sub') },
 ]
 
 function pickBasic(ev: MouseEvent) {
   const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect()
+  lastPickerRect = { left: rect.left, bottom: rect.bottom }
   basicDropdown.value?.openAt(rect.left, rect.bottom + 2)
 }
 
@@ -171,6 +179,8 @@ function applyTemplate() {
     <ToolbarButton icon="strikethrough" title="Strikethrough (Ctrl+Shift+X)" @invoke="ctx.engine.exec('strikeThrough')" />
     <ToolbarButton icon="basic_styles" title="Basic styles" has-arrow @invoke="pickBasic" />
     <CkDropdown ref="basicDropdown" :items="basicItems" />
+
+    <CkColorPicker ref="colorPickerEl" />
 
     <ToolbarButton icon="removeformat" title="Remove Format" @invoke="ctx.engine.exec('removeFormat')" />
     <span class="tb-sep" />
@@ -226,3 +236,25 @@ function applyTemplate() {
     <ToolbarButton icon="indent" title="Increase indent" @invoke="ctx.engine.exec('indent')" />
   </div>
 </template>
+
+<style scoped>
+.tb-clr-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 5px;
+  height: auto;
+  min-height: 28px;
+}
+.tb-clr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.tb-clr-bar {
+  width: 13px;
+  height: 3px;
+  border-radius: 1px;
+}
+</style>

@@ -97,7 +97,7 @@ defineExpose({ openAt })
           :key="item.label"
           type="button"
           class="tb"
-          :class="{ 'tb--has-sub': item.children?.length, 'active': activeLabel === item.label }"
+          :class="{ 'tb--has-sub': item.children?.length || item.arrow, 'active': activeLabel === item.label }"
           :title="item.label + (item.shortcut ? ' (' + item.shortcut + ')' : '')"
           @mousedown.prevent
           @click="select(item)"

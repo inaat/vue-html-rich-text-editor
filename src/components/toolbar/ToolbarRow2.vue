@@ -11,6 +11,8 @@ const ctx = useEditorContext()
 const basicDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const alignDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const lineHeightDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
+const bulletDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
+const orderedDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const colorPickerEl = ref<InstanceType<typeof CkColorPicker> | null>(null)
 const highlightPickerEl = ref<InstanceType<typeof CkHighlightPicker> | null>(null)
 
@@ -19,8 +21,6 @@ let lastPickerRect = { left: 0, bottom: 0 }
 const block = ref('')
 const styleSel = ref('')
 const currentLineHeight = ref('')
-const bullet = ref('')
-const ordered = ref('')
 const tplSel = ref('')
 
 function applyBlock() {
@@ -96,8 +96,26 @@ function applyList(kind: 'ul' | 'ol', style: string) {
   while (list && list.tagName !== 'UL' && list.tagName !== 'OL') list = list.parentNode as HTMLElement | null
   if (list) list.style.listStyleType = style
 }
-function applyBullet() { applyList('ul', bullet.value); bullet.value = '' }
-function applyOrdered() { applyList('ol', ordered.value); ordered.value = '' }
+const bulletItems: DropdownItem[] = [
+  { label: 'Disc',   icon: 'list-disc',   onClick: () => applyList('ul', 'disc') },
+  { label: 'Circle', icon: 'list-circle', onClick: () => applyList('ul', 'circle') },
+  { label: 'Square', icon: 'list-square', onClick: () => applyList('ul', 'square') },
+]
+const orderedItems: DropdownItem[] = [
+  { label: '1. Decimal',     onClick: () => applyList('ol', 'decimal') },
+  { label: 'a. Lower Alpha', onClick: () => applyList('ol', 'lower-alpha') },
+  { label: 'A. Upper Alpha', onClick: () => applyList('ol', 'upper-alpha') },
+  { label: 'i. Lower Roman', onClick: () => applyList('ol', 'lower-roman') },
+  { label: 'I. Upper Roman', onClick: () => applyList('ol', 'upper-roman') },
+]
+function pickBullet(ev: MouseEvent) {
+  const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect()
+  bulletDropdown.value?.openAt(rect.left, rect.bottom + 2)
+}
+function pickOrdered(ev: MouseEvent) {
+  const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect()
+  orderedDropdown.value?.openAt(rect.left, rect.bottom + 2)
+}
 
 function applyBasic(kind: string) {
   switch (kind) {
@@ -226,20 +244,10 @@ function applyTemplate() {
     <ToolbarButton icon="toc" title="Table of contents" @invoke="ctx.insert.toc()" />
     <span class="tb-sep" />
 
-    <select v-model="bullet" class="tb-sel narrow" title="Bulleted list" @change="applyBullet">
-      <option value="">•</option>
-      <option value="disc">• disc</option>
-      <option value="circle">○ circle</option>
-      <option value="square">■ square</option>
-    </select>
-    <select v-model="ordered" class="tb-sel narrow" title="Numbered list" @change="applyOrdered">
-      <option value="">1.</option>
-      <option value="decimal">1. decimal</option>
-      <option value="lower-alpha">a. alpha</option>
-      <option value="upper-alpha">A. ALPHA</option>
-      <option value="lower-roman">i. roman</option>
-      <option value="upper-roman">I. ROMAN</option>
-    </select>
+    <ToolbarButton icon="bulletlist" title="Bulleted list" has-arrow @invoke="pickBullet" />
+    <CkDropdown ref="bulletDropdown" :items="bulletItems" />
+    <ToolbarButton icon="numberedlist" title="Numbered list" has-arrow @invoke="pickOrdered" />
+    <CkDropdown ref="orderedDropdown" :items="orderedItems" />
     <ToolbarButton icon="multilevel" title="Multi-level list" @invoke="ctx.insert.multiLevelList()" />
     <ToolbarButton icon="todolist" title="To-do list" @invoke="ctx.insert.todoList()" />
     <span class="tb-sep" />

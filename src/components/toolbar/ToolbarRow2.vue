@@ -9,6 +9,7 @@ import CkHighlightPicker from './ck-highlight-picker.vue'
 
 const ctx = useEditorContext()
 const basicDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
+const alignDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const colorPickerEl = ref<InstanceType<typeof CkColorPicker> | null>(null)
 const highlightPickerEl = ref<InstanceType<typeof CkHighlightPicker> | null>(null)
 
@@ -16,7 +17,6 @@ let lastPickerRect = { left: 0, bottom: 0 }
 
 const block = ref('')
 const styleSel = ref('')
-const align = ref('')
 const lineHeight = ref('')
 const bullet = ref('')
 const ordered = ref('')
@@ -47,10 +47,7 @@ function applyFontFamily(family: string) {
   if (family) document.execCommand('fontName', false, family)
   else document.execCommand('removeFormat')
 }
-function applyAlign() {
-  if (align.value) ctx.engine.exec(align.value)
-  align.value = ''
-}
+
 function applyLineHeight() {
   const v = lineHeight.value
   const sel = window.getSelection()
@@ -140,6 +137,18 @@ const basicItems: DropdownItem[] = [
   { label: 'Subscript',     icon: 'subscript',     shortcut: 'Ctrl+,',            onClick: () => applyBasic('sub') },
 ]
 
+const alignItems: DropdownItem[] = [
+  { label: 'Align Left',    icon: 'align-left',    shortcut: 'Ctrl+Shift+L', onClick: () => ctx.engine.exec('justifyLeft') },
+  { label: 'Align Center',  icon: 'align-center',  shortcut: 'Ctrl+Shift+E', onClick: () => ctx.engine.exec('justifyCenter') },
+  { label: 'Align Right',   icon: 'align-right',   shortcut: 'Ctrl+Shift+R', onClick: () => ctx.engine.exec('justifyRight') },
+  { label: 'Justify',       icon: 'align-justify', shortcut: 'Ctrl+Shift+J', onClick: () => ctx.engine.exec('justifyFull') },
+]
+
+function pickAlign(ev: MouseEvent) {
+  const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect()
+  alignDropdown.value?.openAt(rect.left, rect.bottom + 2)
+}
+
 function pickBasic(ev: MouseEvent) {
   const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect()
   lastPickerRect = { left: rect.left, bottom: rect.bottom }
@@ -188,13 +197,8 @@ function applyTemplate() {
     <ToolbarButton icon="removeformat" title="Remove Format" @invoke="ctx.engine.exec('removeFormat')" />
     <span class="tb-sep" />
 
-    <select v-model="align" class="tb-sel narrow" title="Text alignment" @change="applyAlign">
-      <option value="">Align</option>
-      <option value="justifyLeft">Left</option>
-      <option value="justifyCenter">Center</option>
-      <option value="justifyRight">Right</option>
-      <option value="justifyFull">Justify</option>
-    </select>
+    <ToolbarButton icon="alignment" title="Text alignment" has-arrow @invoke="pickAlign" />
+    <CkDropdown ref="alignDropdown" :items="alignItems" />
     <select v-model="lineHeight" class="tb-sel narrow" title="Line height" @change="applyLineHeight">
       <option value="">Line</option>
       <option value="1">1.0</option>

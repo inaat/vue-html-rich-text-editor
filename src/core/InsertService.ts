@@ -180,7 +180,7 @@ export class InsertService {
 
   todoList(): void {
     this.htmlAtCursor(
-      '<ul class="todo-list"><li class="todo-item"><label><input type="checkbox" disabled><span class="todo-text">Task</span></label></li></ul>'
+      '<ul class="todo-list"><li class="todo-item"><label contenteditable="false"><input type="checkbox"></label><span class="todo-text">Task</span></li></ul>'
     )
   }
 

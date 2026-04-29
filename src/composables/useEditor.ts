@@ -110,11 +110,87 @@ export function useEditor(options: UseEditorOptions): UseEditorReturn {
     const onInput = () => ctx.scheduleSave()
     root.addEventListener('input', onInput)
 
+    const onTodoClick = (e: MouseEvent) => {
+      const t = e.target as HTMLElement
+      if (t instanceof HTMLInputElement && t.type === 'checkbox' && t.closest('.todo-item')) {
+        ctx.scheduleSave()
+      }
+    }
+    root.addEventListener('click', onTodoClick)
+
+    const onTodoEnter = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter') return
+      const sel = window.getSelection()
+      if (!sel || !sel.rangeCount) return
+      const range = sel.getRangeAt(0)
+      const node = range.startContainer
+      const el = node.nodeType === Node.TEXT_NODE ? node.parentElement : node as HTMLElement
+      const li = el?.closest('.todo-item') as HTMLElement | null
+      if (!li) return
+
+      e.preventDefault()
+      if (!range.collapsed) range.deleteContents()
+
+      const textSpan = li.querySelector('.todo-text') as HTMLElement | null
+      const isEmpty = (textSpan?.textContent ?? '').trim() === ''
+
+      if (isEmpty) {
+        const ul = li.closest('ul.todo-list') as HTMLElement
+        if (!ul) return
+        const p = document.createElement('p')
+        p.innerHTML = '<br>'
+        ul.parentNode!.insertBefore(p, ul.nextSibling)
+        li.remove()
+        if (ul.children.length === 0) ul.remove()
+        const r = document.createRange()
+        r.setStart(p, 0)
+        r.collapse(true)
+        sel.removeAllRanges()
+        sel.addRange(r)
+      } else {
+        let afterFrag: DocumentFragment | null = null
+        if (textSpan?.contains(range.startContainer)) {
+          const afterRange = document.createRange()
+          afterRange.setStart(range.startContainer, range.startOffset)
+          afterRange.setEnd(textSpan, textSpan.childNodes.length)
+          afterFrag = afterRange.extractContents()
+        }
+
+        const newLi = document.createElement('li')
+        newLi.className = 'todo-item'
+        const newLabel = document.createElement('label')
+        newLabel.contentEditable = 'false'
+        const newCb = document.createElement('input')
+        newCb.type = 'checkbox'
+        newLabel.appendChild(newCb)
+        const newSpan = document.createElement('span')
+        newSpan.className = 'todo-text'
+        if (afterFrag && afterFrag.childNodes.length > 0) {
+          newSpan.appendChild(afterFrag)
+        } else {
+          newSpan.innerHTML = '<br>'
+        }
+        newLi.appendChild(newLabel)
+        newLi.appendChild(newSpan)
+        li.parentNode!.insertBefore(newLi, li.nextSibling)
+
+        const r = document.createRange()
+        r.setStart(newSpan, 0)
+        r.collapse(true)
+        sel.removeAllRanges()
+        sel.addRange(r)
+        ctx.scheduleSave()
+      }
+    }
+    root.addEventListener('keydown', onTodoEnter)
+
     const observer = new MutationObserver(() => image.wrapAll())
     observer.observe(root, { childList: true, subtree: true })
 
     onBeforeUnmount(() => {
       root.removeEventListener('input', onInput)
+      root.removeEventListener('click', onTodoClick)
+      root.removeEventListener('keydown', onTodoEnter)
       observer.disconnect()
       engine.detach()
       popup.close()

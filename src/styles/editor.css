@@ -1657,3 +1657,34 @@ body {
   }
   .editor .docx-recovered-label { display: none !important; }
 }
+
+/* ── To-do list ─────────────────────────────── */
+.rte-root ul.todo-list {
+  list-style: none;
+  padding-left: 4px;
+  margin: 4px 0;
+}
+.rte-root .todo-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 2px 0;
+}
+.rte-root .todo-item label {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  line-height: 1;
+  margin-top: 2px;
+}
+.rte-root .todo-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: var(--color-green-600, #0D6B45);
+  flex-shrink: 0;
+}
+.rte-root .todo-text {
+  flex: 1;
+}

@@ -37,6 +37,10 @@ function applyFontSize(size: string) {
   if (size) ctx.engine.exec('fontSize', size)
   else document.execCommand('removeFormat')
 }
+function applyFontFamily(family: string) {
+  if (family) document.execCommand('fontName', false, family)
+  else document.execCommand('removeFormat')
+}
 function applyAlign() {
   if (align.value) ctx.engine.exec(align.value)
   align.value = ''
@@ -104,8 +108,21 @@ const fontSizeChildren: DropdownItem[] = [
   { label: '36',      style: 'font-size:36px', onClick: () => applyFontSize('36') },
 ]
 
+const fontFamilyChildren: DropdownItem[] = [
+  { label: 'Default',            onClick: () => applyFontFamily('') },
+  { label: 'Arial',              style: 'font-family:Arial',                onClick: () => applyFontFamily('Arial') },
+  { label: 'Courier New',        style: 'font-family:"Courier New"',        onClick: () => applyFontFamily('Courier New') },
+  { label: 'Georgia',            style: 'font-family:Georgia',              onClick: () => applyFontFamily('Georgia') },
+  { label: 'Lucida Sans Unicode',style: 'font-family:"Lucida Sans Unicode"',onClick: () => applyFontFamily('Lucida Sans Unicode') },
+  { label: 'Tahoma',             style: 'font-family:Tahoma',               onClick: () => applyFontFamily('Tahoma') },
+  { label: 'Times New Roman',    style: 'font-family:"Times New Roman"',    onClick: () => applyFontFamily('Times New Roman') },
+  { label: 'Trebuchet MS',       style: 'font-family:"Trebuchet MS"',       onClick: () => applyFontFamily('Trebuchet MS') },
+  { label: 'Verdana',            style: 'font-family:Verdana',              onClick: () => applyFontFamily('Verdana') },
+]
+
 const basicItems: DropdownItem[] = [
-  { label: 'Font Size',  icon: 'font_size', children: fontSizeChildren, onClick: () => {} },
+  { label: 'Font Size',   icon: 'font_size',   children: fontSizeChildren,   onClick: () => {} },
+  { label: 'Font Family', icon: 'font_family', children: fontFamilyChildren, onClick: () => {} },
   { label: 'Italic',        icon: 'italic',        shortcut: 'Ctrl+I',       onClick: () => applyBasic('italic') },
   { label: 'Underline',     icon: 'underline',     shortcut: 'Ctrl+U',       onClick: () => applyBasic('underline') },
   { label: 'Strikethrough', icon: 'strikethrough', shortcut: 'Ctrl+Shift+X', onClick: () => applyBasic('strike') },

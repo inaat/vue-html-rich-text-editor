@@ -21,7 +21,9 @@ const posX = ref(0)
 const posY = ref(0)
 const panelEl = ref<HTMLElement | null>(null)
 const submenuEl = ref<HTMLElement | null>(null)
+
 const activeSubmenu = ref<DropdownItem | null>(null)
+const activeLabel = ref<string | null>(null)
 const submenuX = ref(0)
 const submenuY = ref(0)
 
@@ -32,19 +34,27 @@ function openAt(x: number, y: number) {
   posY.value = y
   visible.value = true
   activeSubmenu.value = null
+  activeLabel.value = null
 }
 
 function close() {
   visible.value = false
   activeSubmenu.value = null
+  activeLabel.value = null
 }
 
-function select(item: DropdownItem, event: MouseEvent) {
+function select(item: DropdownItem) {
   if (item.children?.length) {
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
-    submenuX.value = rect.left
-    submenuY.value = rect.bottom + 2
-    activeSubmenu.value = activeSubmenu.value === item ? null : item
+    if (activeLabel.value === item.label) {
+      activeSubmenu.value = null
+      activeLabel.value = null
+      return
+    }
+    const panelRect = panelEl.value!.getBoundingClientRect()
+    submenuX.value = panelRect.left
+    submenuY.value = panelRect.bottom + 2
+    activeSubmenu.value = item
+    activeLabel.value = item.label
     return
   }
   close()
@@ -87,10 +97,10 @@ defineExpose({ openAt })
           :key="item.label"
           type="button"
           class="tb"
-          :class="{ 'tb--has-sub': item.children?.length }"
+          :class="{ 'tb--has-sub': item.children?.length, 'active': activeLabel === item.label }"
           :title="item.label + (item.shortcut ? ' (' + item.shortcut + ')' : '')"
           @mousedown.prevent
-          @click="select(item, $event)"
+          @click="select(item)"
         >
           <Icon :name="item.icon ?? ''" />
         </button>
@@ -103,8 +113,9 @@ defineExpose({ openAt })
           :key="item.label"
           type="button"
           class="tb-menu-item"
+          :class="{ 'tb-menu-item--active': activeLabel === item.label }"
           @mousedown.prevent
-          @click="select(item, $event)"
+          @click="select(item)"
         >
           <span class="tb-menu-label">{{ item.label }}</span>
           <span v-if="item.shortcut" class="tb-menu-shortcut">{{ item.shortcut }}</span>
@@ -113,7 +124,7 @@ defineExpose({ openAt })
       </template>
     </div>
 
-    <!-- submenu panel -->
+    <!-- submenu panel — opens beneath the main panel -->
     <div
       v-if="visible && activeSubmenu"
       ref="submenuEl"
@@ -164,6 +175,7 @@ defineExpose({ openAt })
   flex-shrink: 0;
 }
 
+/* triangle indicator on icon-strip buttons that open a submenu */
 .tb--has-sub {
   position: relative;
 }
@@ -178,5 +190,16 @@ defineExpose({ openAt })
   border-width: 0 0 5px 5px;
   border-color: transparent transparent currentColor transparent;
   opacity: 0.5;
+}
+
+/* active state — hardcoded because Teleport renders outside .rte-root
+   where CSS variables are defined, so var() falls back to nothing. */
+.tb.active {
+  background: #E8F5EE !important;
+  color: #0D6B45 !important;
+}
+.tb-menu-item--active {
+  background: #E8F5EE;
+  color: #0D6B45;
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useEditorContext } from '../../composables/useEditorContext'
 import ToolbarButton from '../ToolbarButton.vue'
 import CkDropdown from './ck-dropdown.vue'
@@ -10,6 +10,7 @@ import CkHighlightPicker from './ck-highlight-picker.vue'
 const ctx = useEditorContext()
 const basicDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const alignDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
+const lineHeightDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const colorPickerEl = ref<InstanceType<typeof CkColorPicker> | null>(null)
 const highlightPickerEl = ref<InstanceType<typeof CkHighlightPicker> | null>(null)
 
@@ -17,7 +18,7 @@ let lastPickerRect = { left: 0, bottom: 0 }
 
 const block = ref('')
 const styleSel = ref('')
-const lineHeight = ref('')
+const currentLineHeight = ref('')
 const bullet = ref('')
 const ordered = ref('')
 const tplSel = ref('')
@@ -48,13 +49,9 @@ function applyFontFamily(family: string) {
   else document.execCommand('removeFormat')
 }
 
-function applyLineHeight() {
-  const v = lineHeight.value
+function applyLineHeight(v: string) {
   const sel = window.getSelection()
-  if (!sel || !sel.rangeCount || !ctx.root.contains(sel.anchorNode)) {
-    lineHeight.value = ''
-    return
-  }
+  if (!sel || !sel.rangeCount || !ctx.root.contains(sel.anchorNode)) return
   const range = sel.getRangeAt(0)
   const targets = new Set<HTMLElement>()
   if (range.collapsed) {
@@ -74,9 +71,23 @@ function applyLineHeight() {
     if (sb) targets.add(sb)
     if (eb) targets.add(eb)
   }
-  targets.forEach((b) => { b.style.lineHeight = v || '' })
-  lineHeight.value = ''
+  targets.forEach((b) => { b.style.lineHeight = v })
+  currentLineHeight.value = v
   ctx.scheduleSave()
+}
+
+const LINE_HEIGHTS = ['1', '1.15', '1.5', '2', '2.5', '3']
+const lineHeightItems = computed<DropdownItem[]>(() =>
+  LINE_HEIGHTS.map(v => ({
+    label: v,
+    shortcut: currentLineHeight.value === v ? '✓' : undefined,
+    onClick: () => applyLineHeight(v),
+  }))
+)
+
+function pickLineHeight(ev: MouseEvent) {
+  const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect()
+  lineHeightDropdown.value?.openAt(rect.left, rect.bottom + 2)
 }
 function applyList(kind: 'ul' | 'ol', style: string) {
   ctx.engine.exec(kind === 'ul' ? 'insertUnorderedList' : 'insertOrderedList')
@@ -199,14 +210,8 @@ function applyTemplate() {
 
     <ToolbarButton icon="alignment" title="Text alignment" has-arrow @invoke="pickAlign" />
     <CkDropdown ref="alignDropdown" :items="alignItems" />
-    <select v-model="lineHeight" class="tb-sel narrow" title="Line height" @change="applyLineHeight">
-      <option value="">Line</option>
-      <option value="1">1.0</option>
-      <option value="1.15">1.15</option>
-      <option value="1.5">1.5</option>
-      <option value="2">2.0</option>
-      <option value="2.5">2.5</option>
-    </select>
+    <ToolbarButton icon="lineheight" title="Line height" has-arrow @invoke="pickLineHeight" />
+    <CkDropdown ref="lineHeightDropdown" :items="lineHeightItems" />
     <span class="tb-sep" />
 
  

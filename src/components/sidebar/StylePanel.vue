@@ -31,6 +31,17 @@ const filteredProps = computed(() => {
 function findTarget(): HTMLElement | null {
   const sel = window.getSelection()
   if (!sel || !sel.rangeCount || !ctx.root.contains(sel.anchorNode)) return null
+
+  // Detect cursor adjacent to an img node (collapsed or wrapping the img)
+  const range = sel.getRangeAt(0)
+  if (range.startContainer.nodeType === 1) {
+    const parent = range.startContainer as Element
+    const at = parent.childNodes[range.startOffset] as Element | undefined
+    const before = parent.childNodes[range.startOffset - 1] as Element | undefined
+    if (at?.tagName === 'IMG') return at as HTMLImageElement
+    if (before?.tagName === 'IMG') return before as HTMLImageElement
+  }
+
   let n: Node | null = sel.anchorNode
   if (n && n.nodeType === 3) n = n.parentNode
   while (n && n !== ctx.root) {
@@ -209,15 +220,28 @@ function setDocumentDir(dir: 'ltr' | 'rtl') {
   ctx.scheduleSave()
 }
 
-function clearOnEditorClick() { pinned.value = null }
+function onEditorMousedown(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  // Image click: target is the <img> itself or a handle span inside .img-handle-wrap
+  const wrap = target.closest('.img-handle-wrap') as HTMLElement | null
+  const img = (target.tagName === 'IMG' ? target : wrap?.querySelector('img')) as HTMLImageElement | null
+  if (img && ctx.root.contains(img)) {
+    pinned.value = img
+    active.value = img
+    readPanel(img)
+    renderAll(img)
+  } else {
+    pinned.value = null
+  }
+}
 
 onMounted(() => {
   document.addEventListener('selectionchange', sync)
-  ctx.root.addEventListener('mousedown', clearOnEditorClick)
+  ctx.root.addEventListener('mousedown', onEditorMousedown)
 })
 onBeforeUnmount(() => {
   document.removeEventListener('selectionchange', sync)
-  ctx.root.removeEventListener('mousedown', clearOnEditorClick)
+  ctx.root.removeEventListener('mousedown', onEditorMousedown)
 })
 </script>
 

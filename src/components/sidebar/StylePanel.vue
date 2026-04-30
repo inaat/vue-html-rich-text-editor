@@ -93,6 +93,7 @@ function readPanel(el: HTMLElement | null) {
     borderRightWidth: get('borderRightWidth'),
     borderBottomWidth: get('borderBottomWidth'),
     borderLeftWidth: get('borderLeftWidth'),
+    borderStyle: el.style.borderStyle || '',
     borderRadius: get('borderRadius')
   }
   colors.value = {
@@ -148,15 +149,31 @@ function pickFromBreadcrumb(node: HTMLElement) {
   renderAll(node)
 }
 
+const BORDER_WIDTH_TO_STYLE: Record<string, string> = {
+  borderTopWidth: 'borderTopStyle',
+  borderRightWidth: 'borderRightStyle',
+  borderBottomWidth: 'borderBottomStyle',
+  borderLeftWidth: 'borderLeftStyle',
+}
+
 function onFieldInput(prop: string, ev: Event, raw = false) {
   const target = ev.target as HTMLInputElement
   if (!active.value) return
   values.value[prop] = target.value
   const v = target.value.trim()
   const style: any = active.value.style
-  if (v === '') style[prop] = ''
-  else if (!raw && /^-?\d+(\.\d+)?$/.test(v)) style[prop] = v + 'px'
-  else style[prop] = v
+  if (v === '') {
+    style[prop] = ''
+  } else if (!raw && /^-?\d+(\.\d+)?$/.test(v)) {
+    style[prop] = v + 'px'
+  } else {
+    style[prop] = v
+  }
+  // Ensure border is visible when width is set
+  const styleKey = BORDER_WIDTH_TO_STYLE[prop]
+  if (styleKey && v !== '' && !style[styleKey]) {
+    style[styleKey] = 'solid'
+  }
   ctx.scheduleSave()
 }
 
@@ -174,6 +191,31 @@ function clearStyles() {
   readPanel(active.value)
   renderAll(active.value)
   ctx.scheduleSave()
+}
+
+function insertChild(ev: MouseEvent) {
+  if (!active.value) return
+  const parent = active.value
+  ctx.popup.showElementMenu(ev.currentTarget as HTMLElement, (tag, _isBlock, content) => {
+    const VOID = new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr'])
+    const el = document.createElement(tag)
+    if (!VOID.has(tag)) el.innerHTML = content ?? '<br>'
+    parent.appendChild(el)
+    pinned.value = el
+    active.value = el
+    readPanel(el)
+    renderAll(el)
+    // move cursor inside new child
+    const sel = window.getSelection()
+    if (sel && !VOID.has(tag)) {
+      const cursor = document.createRange()
+      cursor.setStart(el, 0)
+      cursor.collapse(true)
+      sel.removeAllRanges()
+      sel.addRange(cursor)
+    }
+    ctx.scheduleSave()
+  })
 }
 
 function deleteEl() {
@@ -257,6 +299,7 @@ onBeforeUnmount(() => {
       <span class="sp-tag">{{ tagLabel }}</span>
       <button type="button" class="sp-dir-btn" title="Set LTR on element" :disabled="!active" @mousedown.prevent @click="setElementDir('ltr')">LTR</button>
       <button type="button" class="sp-dir-btn" title="Set RTL on element" :disabled="!active" @mousedown.prevent @click="setElementDir('rtl')">RTL</button>
+      <button type="button" class="sp-child-btn" title="Insert child element" :disabled="!active" @mousedown.prevent @click="insertChild">＋child</button>
       <button type="button" class="sp-del" title="Delete this element" @click="deleteEl">🗑</button>
     </div>
     <div class="sp-breadcrumb">
@@ -319,6 +362,17 @@ onBeforeUnmount(() => {
       </div>
       <div class="sp-row">
         <label>Color <input type="color" :value="colors.borderColor" @input="onColorChange('borderColor', $event)" /></label>
+        <label>Style
+          <select :value="values.borderStyle || 'solid'" @change="onFieldInput('borderStyle', $event, true)">
+            <option value="solid">solid</option>
+            <option value="dashed">dashed</option>
+            <option value="dotted">dotted</option>
+            <option value="double">double</option>
+            <option value="groove">groove</option>
+            <option value="ridge">ridge</option>
+            <option value="none">none</option>
+          </select>
+        </label>
       </div>
       <label class="sp-full">Radius <input :value="values.borderRadius" @input="onFieldInput('borderRadius', $event)" /></label>
     </details>
@@ -380,6 +434,24 @@ onBeforeUnmount(() => {
   color: #0d6b45;
 }
 .sp-dir-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.sp-child-btn {
+  font-size: 11px;
+  padding: 1px 6px;
+  border: 1px solid #6366f1;
+  border-radius: 4px;
+  background: #eef2ff;
+  color: #4338ca;
+  cursor: pointer;
+  line-height: 1.6;
+}
+.sp-child-btn:hover {
+  background: #e0e7ff;
+  border-color: #4338ca;
+}
+.sp-child-btn:disabled {
   opacity: 0.4;
   cursor: default;
 }

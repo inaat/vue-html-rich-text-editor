@@ -383,6 +383,16 @@ body {
   border-radius: 3px; font-weight: 500; flex-shrink: 0;
 }
 
+/* Element picker popup */
+.tb-elem-menu { min-width: 280px; }
+.tb-elem-tag {
+  font-family: 'Courier New', monospace; font-size: 12px; font-weight: 600;
+  color: #0d6b45; flex: 0 0 auto; min-width: 90px;
+}
+.tb-elem-desc {
+  flex: 1; font-size: 12px; color: #4b5563;
+}
+
 /* Merge field chips in content */
 .merge-field {
   display: inline-flex; align-items: center;

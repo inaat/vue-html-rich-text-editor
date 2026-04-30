@@ -127,6 +127,64 @@ export class InsertService {
     })
   }
 
+  insertElement(tag: string, isBlock: boolean, content?: string): void {
+    this.selection.ensure()
+    const sel = window.getSelection()
+    if (!sel || !sel.rangeCount) return
+
+    const VOID = new Set(['area','base','br','col','embed','hr','img','input',
+      'link','meta','param','source','track','wbr'])
+    const isVoid = VOID.has(tag)
+
+    if (isBlock) {
+      const range = sel.getRangeAt(0)
+      range.deleteContents()
+      const root = this.selection.root
+
+      const BLOCK = new Set(['P','DIV','H1','H2','H3','H4','H5','H6',
+        'BLOCKQUOTE','PRE','UL','OL','LI','TABLE','THEAD','TBODY','TFOOT',
+        'TR','TD','TH','FIGURE','SECTION','ARTICLE','ASIDE','HEADER',
+        'FOOTER','NAV','MAIN','ADDRESS','DETAILS','SUMMARY','DIALOG'])
+      let node: Node | null = range.startContainer
+      let blockEl: HTMLElement | null = null
+      while (node && node !== root) {
+        if (node.nodeType === 1 && BLOCK.has((node as HTMLElement).tagName)) {
+          blockEl = node as HTMLElement
+          break  // use nearest block ancestor, not outermost
+        }
+        node = node.parentNode
+      }
+
+      const el = document.createElement(tag)
+      if (!isVoid) el.innerHTML = content ?? '<br>'
+      if (blockEl?.parentNode) {
+        blockEl.parentNode.insertBefore(el, blockEl.nextSibling)
+      } else {
+        root?.appendChild(el)
+      }
+
+      const cursor = document.createRange()
+      cursor.setStart(el, 0)
+      cursor.collapse(true)
+      sel.removeAllRanges()
+      sel.addRange(cursor)
+      root?.dispatchEvent(new InputEvent('input', { bubbles: true }))
+    } else {
+      // Inline: void elements insert standalone; others wrap selection
+      if (isVoid) {
+        const el = document.createElement(tag)
+        this.insertInlineNode(() => el)
+      } else {
+        const text = sel.isCollapsed ? '' : sel.toString()
+        if (content !== undefined && content !== '') {
+          document.execCommand('insertHTML', false, `<${tag}>${content}</${tag}>`)
+        } else {
+          document.execCommand('insertHTML', false, `<${tag}>${text || '​'}</${tag}>`)
+        }
+      }
+    }
+  }
+
   private insertInlineNode(create: () => HTMLElement): void {
     this.selection.ensure()
     const sel = window.getSelection()

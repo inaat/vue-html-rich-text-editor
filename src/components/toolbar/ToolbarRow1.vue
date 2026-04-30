@@ -126,6 +126,12 @@ function insertBookmark() {
 function insertCodeBlock() {
   ctx.insert.codeBlock(window.getSelection()?.toString() ?? '')
 }
+function pickElement(ev: MouseEvent) {
+  ctx.selection.remember()
+  ctx.popup.showElementMenu(ev.currentTarget as HTMLElement, (tag, isBlock, content) => {
+    ctx.insert.insertElement(tag, isBlock, content)
+  })
+}
 function pickCaseChange(ev: MouseEvent) {
   ctx.popup.showMenu(ev.currentTarget as HTMLElement, [
     { label: 'UPPER CASE', onClick: () => ctx.insert.caseChange('upper') },
@@ -193,6 +199,7 @@ function quoteBlock() { ctx.engine.exec('formatBlock', '<blockquote>') }
     <ToolbarButton icon="blockquote" title="Block quote" @invoke="quoteBlock" />
     <ToolbarButton icon="media" title="Insert video / media" @invoke="insertVideo" />
     <ToolbarButton icon="embed" title="Embed HTML" @invoke="insertEmbed" />
+    <ToolbarButton icon="htmlblock" title="Insert HTML element" has-arrow @invoke="pickElement" />
     <ToolbarButton icon="codeblock" title="Insert code block" @invoke="insertCodeBlock" />
     <ToolbarButton icon="pagebreak" title="Page break" @invoke="ctx.insert.pageBreak()" />
     <ToolbarButton icon="hrule" title="Horizontal line" @invoke="ctx.insert.hr()" />

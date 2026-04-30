@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import { useEditorContext } from '../../composables/useEditorContext'
-import { DirectionService } from '../../core/DirectionService'
 
 const props = defineProps<{
   visible: boolean
@@ -31,6 +30,20 @@ function insertLink() {
   const url = prompt('Link URL:', 'https://')
   if (url) ctx.engine.exec('createLink', url)
 }
+
+function setDir(dir: 'ltr' | 'rtl') {
+  const sel = window.getSelection()
+  if (!sel || !sel.rangeCount) return
+  let node: Node | null = sel.getRangeAt(0).startContainer
+  if (node.nodeType === 3) node = node.parentNode
+  while (node && node !== ctx.root) {
+    const el = node as HTMLElement
+    if (el.tagName) { el.setAttribute('dir', dir); ctx.scheduleSave(); return }
+    node = node.parentNode
+  }
+  ctx.root.setAttribute('dir', dir)
+  ctx.scheduleSave()
+}
 </script>
 
 <template>
@@ -45,7 +58,7 @@ function insertLink() {
     <button @click="ctx.engine.exec('italic')"><i>I</i></button>
     <button @click="ctx.engine.exec('underline')"><u>U</u></button>
     <button @click="insertLink">🔗</button>
-    <button @click="DirectionService.setBlockDir(ctx.selection.selectionBlock(), 'ltr')">LTR</button>
-    <button @click="DirectionService.setBlockDir(ctx.selection.selectionBlock(), 'rtl')">RTL</button>
+    <button @mousedown.prevent @click="setDir('ltr')">LTR</button>
+    <button @mousedown.prevent @click="setDir('rtl')">RTL</button>
   </div>
 </template>

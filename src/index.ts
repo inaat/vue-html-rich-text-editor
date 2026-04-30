@@ -52,7 +52,9 @@ export type {
   RichTextEditorEmits,
   PageSettings as PageSettingsType,
   PagePreset,
-  DocumentMeta as DocumentMetaType
+  DocumentMeta as DocumentMetaType,
+  MergeFieldItem,
+  MergeFieldCategory
 } from './types'
 export { PAGE_PRESETS, EMPTY_META } from './types'
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useEditorContext } from '../../composables/useEditorContext'
+import { DirectionService } from '../../core/DirectionService'
 import ToolbarButton from '../ToolbarButton.vue'
 import CkDropdown from './ck-dropdown.vue'
 import type { DropdownItem } from './ck-dropdown.vue'
@@ -183,11 +184,21 @@ const basicItems: DropdownItem[] = [
   { label: 'Subscript',     icon: 'subscript',     shortcut: 'Ctrl+,',            onClick: () => applyBasic('sub') },
 ]
 
+function setDir(dir: 'ltr' | 'rtl') {
+  const sel = window.getSelection()
+  if (!sel || !sel.rangeCount || !ctx.root.contains(sel.anchorNode)) return
+  const block = ctx.selection.selectionBlock() ?? (sel.anchorNode?.nodeType === 1 ? sel.anchorNode as HTMLElement : sel.anchorNode?.parentElement ?? null)
+  DirectionService.setBlockDir(block, dir)
+  ctx.scheduleSave()
+}
+
 const alignItems: DropdownItem[] = [
   { label: 'Align Left',    icon: 'align-left',    shortcut: 'Ctrl+Shift+L', onClick: () => ctx.engine.exec('justifyLeft') },
   { label: 'Align Center',  icon: 'align-center',  shortcut: 'Ctrl+Shift+E', onClick: () => ctx.engine.exec('justifyCenter') },
   { label: 'Align Right',   icon: 'align-right',   shortcut: 'Ctrl+Shift+R', onClick: () => ctx.engine.exec('justifyRight') },
   { label: 'Justify',       icon: 'align-justify', shortcut: 'Ctrl+Shift+J', onClick: () => ctx.engine.exec('justifyFull') },
+  { label: 'Left to Right', icon: 'ltr',                                      onClick: () => setDir('ltr') },
+  { label: 'Right to Left', icon: 'rtl',                                      onClick: () => setDir('rtl') },
 ]
 
 function pickAlign(ev: MouseEvent) {

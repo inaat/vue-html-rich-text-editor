@@ -3,12 +3,14 @@ import { useEditorContext } from '../../composables/useEditorContext'
 import { pickFile } from '../../core/InsertService'
 import ToolbarButton from '../ToolbarButton.vue'
 import Icon from '../Icon.vue'
+import type { MergeFieldCategory } from '../../types'
 
 import { ref } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   zoom: number
   fullscreen: boolean
+  fields?: MergeFieldCategory[]
 }>()
 
 const ctx = useEditorContext()
@@ -88,19 +90,31 @@ function insertLink(ev: MouseEvent) {
   emit('open-link', { rect: { top: r.top, left: r.left, bottom: r.bottom } })
 }
 function insertMergeField() {
+  ctx.selection.remember()
   const name = prompt('Merge field name (e.g. customer.name):', 'field')
   if (name) ctx.insert.mergeField(name)
 }
 function pickMergeField(ev: MouseEvent) {
-  ctx.popup.showMenu(ev.currentTarget as HTMLElement, [
-    { label: 'customer.name', onClick: () => ctx.insert.mergeField('customer.name') },
-    { label: 'customer.email', onClick: () => ctx.insert.mergeField('customer.email') },
-    { label: 'invoice.number', onClick: () => ctx.insert.mergeField('invoice.number') },
-    { label: 'invoice.date', onClick: () => ctx.insert.mergeField('invoice.date') },
-    { label: 'invoice.total', onClick: () => ctx.insert.mergeField('invoice.total') },
-    { separator: true },
-    { label: 'Custom field…', onClick: insertMergeField }
-  ])
+  ctx.selection.remember()
+  if (props.fields?.length) {
+    ctx.popup.showMergeFieldMenu(ev.currentTarget as HTMLElement, props.fields, (item) => {
+      if (item.type === 'image') {
+        ctx.insert.imagePlaceholder(item.value, item.label)
+      } else {
+        ctx.insert.mergeField(item.value, item.label)
+      }
+    })
+  } else {
+    ctx.popup.showMenu(ev.currentTarget as HTMLElement, [
+      { label: 'customer.name', onClick: () => ctx.insert.mergeField('customer.name') },
+      { label: 'customer.email', onClick: () => ctx.insert.mergeField('customer.email') },
+      { label: 'invoice.number', onClick: () => ctx.insert.mergeField('invoice.number') },
+      { label: 'invoice.date', onClick: () => ctx.insert.mergeField('invoice.date') },
+      { label: 'invoice.total', onClick: () => ctx.insert.mergeField('invoice.total') },
+      { separator: true },
+      { label: 'Custom field…', onClick: insertMergeField }
+    ])
+  }
 }
 function insertFootnote() {
   ctx.insert.footnote()
@@ -145,7 +159,7 @@ function quoteBlock() { ctx.engine.exec('formatBlock', '<blockquote>') }
 
     <div class="tb-split">
       <ToolbarButton icon="mergefield" title="Insert merge field" @invoke="insertMergeField" />
-      <button type="button" class="tb-arr" title="Choose merge field" @click="pickMergeField">
+      <button type="button" class="tb-arr" title="Choose merge field" @mousedown.prevent @click="pickMergeField">
         <svg viewBox="0 0 10 10"><path d="M.941 4.523a.75.75 0 1 1 1.06-1.06l3.006 3.005 3.005-3.005a.75.75 0 1 1 1.06 1.06l-3.549 3.55a.75.75 0 0 1-1.168-.136z"/></svg>
       </button>
     </div>

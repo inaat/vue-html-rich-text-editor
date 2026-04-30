@@ -10,7 +10,7 @@ import { useImageTools } from '../composables/useImageTools'
 import { useShortcuts } from '../composables/useShortcuts'
 import { formatBytes } from '../core/Format'
 import { DirectionService } from '../core/DirectionService'
-import type { DocumentMeta } from '../types'
+import type { DocumentMeta, MergeFieldCategory } from '../types'
 import { EMPTY_META } from '../types'
 import Toolbar from './toolbar/Toolbar.vue'
 import EditorPane from './EditorPane.vue'
@@ -27,6 +27,7 @@ import ImageUrlDialog from './ImageUrlDialog.vue'
 const props = withDefaults(defineProps<{
   modelValue?: string
   apiBase?: string
+  fields?: MergeFieldCategory[]
 }>(), { modelValue: '' })
 
 const emit = defineEmits<{
@@ -329,6 +330,7 @@ const statusClasses = computed(() => `status floating ${status.value.kind} ${sta
       ref="toolbarRef"
       :zoom="zoom"
       :fullscreen="fullscreen"
+      :fields="props.fields"
       @toggle-source="toggleSource"
       @import-files="importFiles"
       @zoom-in="zoomIn"

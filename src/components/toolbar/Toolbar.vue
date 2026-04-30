@@ -3,10 +3,12 @@ import { ref } from 'vue'
 import MenuBar from './MenuBar.vue'
 import ToolbarRow1 from './ToolbarRow1.vue'
 import ToolbarRow2 from './ToolbarRow2.vue'
+import type { MergeFieldCategory } from '../../types'
 
 defineProps<{
   zoom: number
   fullscreen: boolean
+  fields?: MergeFieldCategory[]
 }>()
 
 defineEmits<{
@@ -42,6 +44,7 @@ function openHeadingMenu() {
     <ToolbarRow1
       :zoom="zoom"
       :fullscreen="fullscreen"
+      :fields="fields"
       @toggle-source="$emit('toggle-source')"
       @import-files="$emit('import-files')"
       @open-heading-menu="openHeadingMenu"

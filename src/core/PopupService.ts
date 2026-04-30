@@ -1,4 +1,5 @@
 import { ICONS } from '../icons/registry'
+import type { MergeFieldCategory, MergeFieldItem } from '../types/MergeField'
 
 export interface PopupItem {
   label?: string
@@ -54,6 +55,63 @@ export class PopupService {
       pop.appendChild(b)
     }
     this.position(pop, anchor)
+  }
+
+  showMergeFieldMenu(anchor: HTMLElement, categories: MergeFieldCategory[], onInsert: (item: MergeFieldItem) => void): void {
+    this.close()
+    const pop = document.createElement('div')
+    pop.className = 'tb-popup tb-menu tb-merge-menu'
+
+    const searchWrap = document.createElement('div')
+    searchWrap.className = 'tb-menu-search-wrap'
+    const searchInput = document.createElement('input')
+    searchInput.type = 'text'
+    searchInput.placeholder = 'Search merge field'
+    searchInput.className = 'tb-menu-search'
+    searchWrap.appendChild(searchInput)
+    pop.appendChild(searchWrap)
+
+    const listEl = document.createElement('div')
+    listEl.className = 'tb-merge-list'
+    pop.appendChild(listEl)
+
+    const renderList = (query: string) => {
+      listEl.innerHTML = ''
+      const q = query.toLowerCase()
+      for (const cat of categories) {
+        const visible = cat.fields.filter(f =>
+          !q || f.label.toLowerCase().includes(q) || f.value.toLowerCase().includes(q)
+        )
+        if (!visible.length) continue
+        const header = document.createElement('div')
+        header.className = 'tb-menu-category'
+        header.textContent = cat.label
+        listEl.appendChild(header)
+        for (const field of visible) {
+          const btn = document.createElement('button')
+          btn.type = 'button'
+          btn.className = 'tb-menu-item'
+          const label = document.createElement('span')
+          label.className = 'tb-menu-label'
+          label.textContent = field.label
+          btn.appendChild(label)
+          if (field.type === 'image') {
+            const badge = document.createElement('span')
+            badge.className = 'tb-merge-badge'
+            badge.textContent = 'image'
+            btn.appendChild(badge)
+          }
+          btn.addEventListener('mousedown', e => e.preventDefault())
+          btn.addEventListener('click', () => { this.close(); onInsert(field) })
+          listEl.appendChild(btn)
+        }
+      }
+    }
+
+    renderList('')
+    searchInput.addEventListener('input', () => renderList(searchInput.value))
+    this.position(pop, anchor)
+    setTimeout(() => searchInput.focus(), 50)
   }
 
   showTableGrid(anchor: HTMLElement, onPick: (rows: number, cols: number) => void): void {

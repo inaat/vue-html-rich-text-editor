@@ -98,10 +98,50 @@ export class InsertService {
 
   /* ── New design features ── */
 
-  mergeField(name: string): void {
-    if (!name) return
-    const safe = name.trim().replace(/[<>]/g, '')
-    this.htmlAtCursor(`<span class="merge-field" data-merge="${safe}" contenteditable="false">{{${safe}}}</span>&nbsp;`)
+  mergeField(value: string, label?: string): void {
+    if (!value) return
+    const safeVal = value.trim().replace(/[<>]/g, '')
+    const display = (label ?? safeVal).trim().replace(/[<>]/g, '')
+    this.insertInlineNode(() => {
+      const span = document.createElement('span')
+      span.className = 'merge-field'
+      span.dataset.merge = safeVal
+      span.setAttribute('contenteditable', 'false')
+      span.textContent = display
+      return span
+    })
+  }
+
+  imagePlaceholder(value: string, label?: string): void {
+    if (!value) return
+    const safeVal = value.trim().replace(/[<>]/g, '')
+    const display = (label ?? safeVal).trim().replace(/[<>]/g, '')
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120"><rect width="200" height="120" fill="#e5e7eb" rx="4"/><text x="100" y="54" text-anchor="middle" font-family="sans-serif" font-size="12" fill="#6b7280">${display}</text><text x="100" y="74" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#9ca3af">image placeholder</text></svg>`
+    this.insertInlineNode(() => {
+      const img = document.createElement('img')
+      img.className = 'merge-field-image'
+      img.dataset.merge = safeVal
+      img.src = `data:image/svg+xml,${encodeURIComponent(svg)}`
+      img.alt = display
+      return img
+    })
+  }
+
+  private insertInlineNode(create: () => HTMLElement): void {
+    this.selection.ensure()
+    const sel = window.getSelection()
+    if (!sel || !sel.rangeCount) return
+    const range = sel.getRangeAt(0)
+    range.deleteContents()
+    const node = create()
+    const space = document.createTextNode(' ')
+    range.insertNode(space)
+    range.insertNode(node)
+    const after = document.createRange()
+    after.setStartAfter(space)
+    after.collapse(true)
+    sel.removeAllRanges()
+    sel.addRange(after)
   }
 
   footnote(): void {

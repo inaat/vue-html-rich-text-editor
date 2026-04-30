@@ -198,6 +198,17 @@ function setRaw(name: string, ev: Event) {
   ctx.scheduleSave()
 }
 
+function setElementDir(dir: 'ltr' | 'rtl') {
+  if (!active.value) return
+  active.value.setAttribute('dir', dir)
+  ctx.scheduleSave()
+}
+
+function setDocumentDir(dir: 'ltr' | 'rtl') {
+  ctx.root.setAttribute('dir', dir)
+  ctx.scheduleSave()
+}
+
 function clearOnEditorClick() { pinned.value = null }
 
 onMounted(() => {
@@ -212,9 +223,16 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="style-panel">
+    <div class="sp-doc-dir">
+      <span class="sp-tag-label">Document:</span>
+      <button type="button" class="sp-dir-btn" @mousedown.prevent @click="setDocumentDir('ltr')">LTR</button>
+      <button type="button" class="sp-dir-btn" @mousedown.prevent @click="setDocumentDir('rtl')">RTL</button>
+    </div>
     <div class="sp-tag-row">
       <span class="sp-tag-label">Selected:</span>
       <span class="sp-tag">{{ tagLabel }}</span>
+      <button type="button" class="sp-dir-btn" title="Set LTR on element" :disabled="!active" @mousedown.prevent @click="setElementDir('ltr')">LTR</button>
+      <button type="button" class="sp-dir-btn" title="Set RTL on element" :disabled="!active" @mousedown.prevent @click="setElementDir('rtl')">RTL</button>
       <button type="button" class="sp-del" title="Delete this element" @click="deleteEl">🗑</button>
     </div>
     <div class="sp-breadcrumb">
@@ -314,3 +332,31 @@ onBeforeUnmount(() => {
     <button type="button" class="btn-secondary" @click="clearStyles">Clear inline styles</button>
   </div>
 </template>
+
+<style scoped>
+.sp-doc-dir,
+.sp-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+}
+.sp-dir-btn {
+  font-size: 11px;
+  padding: 1px 6px;
+  border: 1px solid #d0d5dd;
+  border-radius: 4px;
+  background: #f9fafb;
+  cursor: pointer;
+  line-height: 1.6;
+}
+.sp-dir-btn:hover {
+  background: #e8f5ee;
+  border-color: #0d6b45;
+  color: #0d6b45;
+}
+.sp-dir-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+</style>

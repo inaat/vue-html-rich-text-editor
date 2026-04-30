@@ -173,7 +173,7 @@ function quoteBlock() { ctx.engine.exec('formatBlock', '<blockquote>') }
 
     <ToolbarButton icon="word-import" title="Import from Word / HTML" @invoke="emit('import-files')" />
     <ToolbarButton icon="word-export" title="Export to Word" @invoke="ctx.export.toWordDoc(ctx.getFilename())" />
-    <ToolbarButton icon="pdf" title="Export to PDF" @invoke="ctx.export.toPdf()" />
+    <ToolbarButton icon="pdf" title="Export to PDF" @invoke="ctx.export.toPdf(ctx.page.current)" />
     <span class="tb-sep" />
 
     <ToolbarButton icon="paint" title="Paint formatting (Ctrl+Alt+C)" @invoke="startPaint" />

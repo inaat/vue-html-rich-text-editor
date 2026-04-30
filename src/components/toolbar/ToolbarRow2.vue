@@ -168,6 +168,11 @@ const fontFamilyChildren: DropdownItem[] = [
   { label: 'Times New Roman',    style: 'font-family:"Times New Roman"',    onClick: () => applyFontFamily('Times New Roman') },
   { label: 'Trebuchet MS',       style: 'font-family:"Trebuchet MS"',       onClick: () => applyFontFamily('Trebuchet MS') },
   { label: 'Verdana',            style: 'font-family:Verdana',              onClick: () => applyFontFamily('Verdana') },
+  { separator: true },
+  { label: 'IBM Plex Arabic',    style: 'font-family:"IBM Plex Arabic"',    onClick: () => applyFontFamily('IBM Plex Arabic') },
+  { label: 'Noto Sans Arabic',   style: 'font-family:"Noto Sans Arabic"',   onClick: () => applyFontFamily('Noto Sans Arabic') },
+  { label: 'Cairo',              style: 'font-family:Cairo',                onClick: () => applyFontFamily('Cairo') },
+  { label: 'Amiri',              style: 'font-family:Amiri',                onClick: () => applyFontFamily('Amiri') },
 ]
 
 const basicItems: DropdownItem[] = [

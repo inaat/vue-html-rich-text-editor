@@ -79,7 +79,7 @@ function open(key: MenuKey, ev: MouseEvent) {
         { separator: true },
         { label: 'Import from Word / HTML…', onClick: () => emit('import-files') },
         { label: 'Export to Word', onClick: () => ctx.export.toWordDoc(ctx.getFilename()) },
-        { label: 'Export to PDF', onClick: () => ctx.export.toPdf() },
+        { label: 'Export to PDF', onClick: () => ctx.export.toPdf(ctx.page.current) },
         { separator: true },
         { label: 'Preview in new tab', onClick: () => ctx.export.preview(ctx.getFilename(), ctx.page.current) }
       ]

@@ -854,7 +854,7 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
   border-radius: 2px;
   outline: none;
-  font: 11pt/1.4 Calibri, "Segoe UI", Arial, sans-serif;
+  font: 11pt/1.4 Calibri, "Segoe UI", Arial, "IBM Plex Arabic", "Noto Sans Arabic", "Cairo", sans-serif;
   color: #1a1a1a;
   transform: scale(var(--rte-zoom));
   transform-origin: top center;

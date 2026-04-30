@@ -3,13 +3,14 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Icon from '../Icon.vue'
 
 export interface DropdownItem {
-  label: string
+  label?: string
   icon?: string
   shortcut?: string
   arrow?: boolean
   style?: string
+  separator?: boolean
   children?: DropdownItem[]
-  onClick: () => void
+  onClick?: () => void
 }
 
 const props = defineProps<{
@@ -44,6 +45,7 @@ function close() {
 }
 
 function select(item: DropdownItem) {
+  if (item.separator) return
   if (item.children?.length) {
     if (activeLabel.value === item.label) {
       activeSubmenu.value = null
@@ -54,16 +56,16 @@ function select(item: DropdownItem) {
     submenuX.value = panelRect.left
     submenuY.value = panelRect.bottom + 2
     activeSubmenu.value = item
-    activeLabel.value = item.label
+    activeLabel.value = item.label ?? null
     return
   }
   close()
-  item.onClick()
+  item.onClick?.()
 }
 
 function selectSub(item: DropdownItem) {
   close()
-  item.onClick()
+  item.onClick?.()
 }
 
 function onOutside(e: MouseEvent) {
@@ -108,19 +110,22 @@ defineExpose({ openAt })
 
       <!-- fallback: vertical text list -->
       <template v-else>
-        <button
-          v-for="item in props.items"
-          :key="item.label"
-          type="button"
-          class="tb-menu-item"
-          :class="{ 'tb-menu-item--active': activeLabel === item.label }"
-          @mousedown.prevent
-          @click="select(item)"
-        >
-          <span class="tb-menu-label">{{ item.label }}</span>
-          <span v-if="item.shortcut" class="tb-menu-shortcut">{{ item.shortcut }}</span>
-          <Icon v-if="item.children?.length" name="chevron_right" :size="12" class="tb-menu-arrow" />
-        </button>
+        <template v-for="(item, i) in props.items" :key="i">
+          <div v-if="item.separator" class="ck-dd-sep" />
+          <button
+            v-else
+            type="button"
+            class="tb-menu-item"
+            :class="{ 'tb-menu-item--active': activeLabel === item.label }"
+            @mousedown.prevent
+            @click="select(item)"
+          >
+            <span v-if="item.style" class="tb-menu-label" :style="item.style">{{ item.label }}</span>
+            <span v-else class="tb-menu-label">{{ item.label }}</span>
+            <span v-if="item.shortcut" class="tb-menu-shortcut">{{ item.shortcut }}</span>
+            <Icon v-if="item.children?.length" name="chevron_right" :size="12" class="tb-menu-arrow" />
+          </button>
+        </template>
       </template>
     </div>
 
@@ -167,6 +172,12 @@ defineExpose({ openAt })
   align-items: stretch;
   padding: 4px;
   min-width: 200px;
+}
+
+.ck-dd-sep {
+  height: 1px;
+  background: #e4e7ec;
+  margin: 3px 4px;
 }
 
 .tb-menu-arrow {

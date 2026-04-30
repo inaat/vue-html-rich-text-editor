@@ -6,5 +6,5 @@ const html = ref('<p>Type or paste your content here!</p>')
 </script>
 
 <template>
-  <DocxEditor v-model="html" />
+  <DocxEditor v-model="html" apiBase="http://localhost:3001" />
 </template>

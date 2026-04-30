@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useEditorContext } from '../../composables/useEditorContext'
-import { STYLE_TARGET_TAGS } from '../../core/Constants'
 import { rgbToHex } from '../../core/Format'
 
 const ctx = useEditorContext()
@@ -36,7 +35,7 @@ function findTarget(): HTMLElement | null {
   if (n && n.nodeType === 3) n = n.parentNode
   while (n && n !== ctx.root) {
     const el = n as HTMLElement
-    if (el.tagName && STYLE_TARGET_TAGS.test(el.tagName)) return el
+    if (el.tagName) return el
     n = n.parentNode
   }
   return null

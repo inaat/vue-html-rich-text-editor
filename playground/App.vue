@@ -4,6 +4,28 @@ import { DocxEditor } from '../src'
 import type { MergeFieldCategory } from '../src'
 
 const html = ref('<p>Type or paste your content here!</p>')
+const saving = ref(false)
+
+async function saveToDatabase() {
+  console.log('Saving to database…')
+  if (saving.value) return
+  saving.value = true
+  try {
+    await fetch('http://localhost:3001/documentssave/1', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: html.value }),
+    })
+  } finally {
+    saving.value = false
+  }
+}
+
+async function loadFromDatabase() {
+  const res = await fetch('http://localhost:3001/documents/1')
+  const data = await res.json()
+  html.value = data.content
+}
 
 const fields: MergeFieldCategory[] = [
   {
@@ -38,7 +60,11 @@ const fields: MergeFieldCategory[] = [
 </script>
 
 <template>
-  <DocxEditor v-model="html" :fields="fields" apiBase="http://localhost:3001"
-   
-  />
+  <div>
+    <div style="padding: 8px; display: flex; gap: 8px;">
+      <button @click="loadFromDatabase">Load</button>
+      <button @click="saveToDatabase" :disabled="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
+    </div>
+    <DocxEditor v-model="html" :fields="fields" apiBase="http://localhost:3001" />
+  </div>
 </template>

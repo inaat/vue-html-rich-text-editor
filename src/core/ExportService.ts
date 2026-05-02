@@ -1,4 +1,4 @@
-import type { PageSettings } from '../types'
+import type { PageSettings } from '@/types'
 
 const ARABIC_FONTS = `
   <link rel="preconnect" href="https://fonts.googleapis.com">

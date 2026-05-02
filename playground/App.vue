@@ -38,5 +38,7 @@ const fields: MergeFieldCategory[] = [
 </script>
 
 <template>
-  <DocxEditor v-model="html" :fields="fields" apiBase="http://localhost:3001" />
+  <DocxEditor v-model="html" :fields="fields" apiBase="http://localhost:3001"
+   
+  />
 </template>

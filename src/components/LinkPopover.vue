@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, computed } from 'vue'
-import { useEditorContext } from '../composables/useEditorContext'
+import { useEditorContext } from '@/composables/useEditorContext'
 
 const props = defineProps<{
   visible: boolean

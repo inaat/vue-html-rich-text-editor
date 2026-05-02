@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useEditorContext } from '../../composables/useEditorContext'
-import { useFormatting } from '../../composables/useFormatting'
-import { DirectionService } from '../../core/DirectionService'
-import ToolbarButton from '../ToolbarButton.vue'
-import CkDropdown from './ck-dropdown.vue'
-import type { DropdownItem } from './ck-dropdown.vue'
-import CkColorPicker from './ck-color-picker.vue'
-import CkHighlightPicker from './ck-highlight-picker.vue'
-import CkListPicker from './ck-list-picker.vue'
-import CkMultilevelPicker from './ck-multilevel-picker.vue'
+import { useEditorContext } from '@/composables/useEditorContext'
+import { useFormatting } from '@/composables/useFormatting'
+import { DirectionService } from '@/core/DirectionService'
+import ToolbarButton from '@/components/ToolbarButton.vue'
+import CkDropdown from '@/components/toolbar/ck-dropdown.vue'
+import type { DropdownItem } from '@/components/toolbar/ck-dropdown.vue'
+import CkColorPicker from '@/components/toolbar/ck-color-picker.vue'
+import CkHighlightPicker from '@/components/toolbar/ck-highlight-picker.vue'
+import CkListPicker from '@/components/toolbar/ck-list-picker.vue'
+import CkMultilevelPicker from '@/components/toolbar/ck-multilevel-picker.vue'
 
 const ctx = useEditorContext()
 const { applyBasic, fontSizeChildren, fontFamilyChildren } = useFormatting()

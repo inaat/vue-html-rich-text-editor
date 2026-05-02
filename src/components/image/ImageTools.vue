@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useEditorContext } from '../../composables/useEditorContext'
-import { pickFile } from '../../core/InsertService'
+import { useEditorContext } from '@/composables/useEditorContext'
+import { pickFile } from '@/core/InsertService'
 
 const props = defineProps<{
   visible: boolean

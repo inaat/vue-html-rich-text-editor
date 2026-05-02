@@ -1,5 +1,5 @@
-import { useEditorContext } from './useEditorContext'
-import type { DropdownItem } from '../components/toolbar/ck-dropdown.vue'
+import { useEditorContext } from '@/composables/useEditorContext'
+import type { DropdownItem } from '@/components/toolbar/ck-dropdown.vue'
 
 export function useFormatting() {
   const ctx = useEditorContext()

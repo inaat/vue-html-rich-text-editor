@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import PageSettings from './PageSettings.vue'
-import StylePanel from './StylePanel.vue'
-import DocumentMeta from './DocumentMeta.vue'
-import type { DocumentMeta as DocMeta } from '../../types'
+import PageSettings from '@/components/sidebar/PageSettings.vue'
+import StylePanel from '@/components/sidebar/StylePanel.vue'
+import DocumentMeta from '@/components/sidebar/DocumentMeta.vue'
+import type { DocumentMeta as DocMeta } from '@/types'
 
 defineProps<{ meta: DocMeta }>()
 

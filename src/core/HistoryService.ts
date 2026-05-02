@@ -1,4 +1,4 @@
-import { HISTORY_MAX } from './Constants'
+import { HISTORY_MAX } from '@/core/Constants'
 
 export class HistoryService {
   private undoStack: string[] = []

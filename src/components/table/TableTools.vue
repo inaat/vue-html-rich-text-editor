@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useEditorContext } from '../../composables/useEditorContext'
-import type { TableAction, TableContext } from '../../core/TableService'
+import { useEditorContext } from '@/composables/useEditorContext'
+import type { TableAction, TableContext } from '@/core/TableService'
 
 const props = defineProps<{
   visible: boolean

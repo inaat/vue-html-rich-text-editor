@@ -1,4 +1,4 @@
-import { RTL_RE, RTL_RE_G } from './Constants'
+import { RTL_RE, RTL_RE_G } from '@/core/Constants'
 
 export class DirectionService {
   static autoDirection(root: HTMLElement): void {

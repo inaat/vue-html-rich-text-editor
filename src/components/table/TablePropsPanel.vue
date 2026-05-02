@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { useEditorContext } from '../../composables/useEditorContext'
-import { parseLen } from '../../core/Format'
+import { useEditorContext } from '@/composables/useEditorContext'
+import { parseLen } from '@/core/Format'
 
 const props = defineProps<{
   visible: boolean

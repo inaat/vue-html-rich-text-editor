@@ -1,6 +1,6 @@
-import type { EditorEngine } from './EditorEngine'
-import type { HistoryService } from './HistoryService'
-import type { SelectionService } from './SelectionService'
+import type { EditorEngine } from '@/core/EditorEngine'
+import type { HistoryService } from '@/core/HistoryService'
+import type { SelectionService } from '@/core/SelectionService'
 
 export class ExecCommandEngine implements EditorEngine {
   private element: HTMLElement | null = null

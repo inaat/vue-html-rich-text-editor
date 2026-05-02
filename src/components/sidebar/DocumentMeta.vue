@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DocumentMeta } from '../../types'
+import type { DocumentMeta } from '@/types'
 
 defineProps<{ meta: DocumentMeta }>()
 </script>

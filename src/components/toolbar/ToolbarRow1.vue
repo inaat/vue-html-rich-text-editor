@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useEditorContext } from '../../composables/useEditorContext'
-import { pickFile } from '../../core/InsertService'
-import ToolbarButton from '../ToolbarButton.vue'
-import Icon from '../Icon.vue'
-import type { MergeFieldCategory } from '../../types'
+import { useEditorContext } from '@/composables/useEditorContext'
+import { pickFile } from '@/core/InsertService'
+import ToolbarButton from '@/components/ToolbarButton.vue'
+import Icon from '@/components/Icon.vue'
+import type { MergeFieldCategory } from '@/types'
 
 import { ref } from 'vue'
 

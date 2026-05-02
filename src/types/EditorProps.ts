@@ -1,4 +1,4 @@
-import type { EditorCommand } from './EditorCommand'
+import type { EditorCommand } from '@/types/EditorCommand'
 
 export interface RichTextEditorProps {
   modelValue?: string

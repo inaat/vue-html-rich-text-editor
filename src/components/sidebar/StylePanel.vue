@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useEditorContext } from '../../composables/useEditorContext'
-import { rgbToHex } from '../../core/Format'
+import { useEditorContext } from '@/composables/useEditorContext'
+import { rgbToHex } from '@/core/Format'
 
 const ctx = useEditorContext()
 

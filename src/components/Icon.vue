@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ICONS } from '../icons/registry'
+import { ICONS } from '@/icons/registry'
 
 const props = withDefaults(defineProps<{
   name: string

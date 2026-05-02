@@ -1,4 +1,4 @@
-import type { EditorCommand } from '../types'
+import type { EditorCommand } from '@/types'
 
 export class CommandRegistry {
   private commands = new Map<string, EditorCommand>()

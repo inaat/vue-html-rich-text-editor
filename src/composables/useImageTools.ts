@@ -1,5 +1,5 @@
 import { ref, onMounted, onBeforeUnmount, type Ref } from 'vue'
-import type { ImageService } from '../core/ImageService'
+import type { ImageService } from '@/core/ImageService'
 
 export interface ImageToolsState {
   visible: boolean

@@ -1,6 +1,6 @@
 import { onMounted, onBeforeUnmount } from 'vue'
-import type { EditorContext } from './useEditorContext'
-import { DirectionService } from '../core/DirectionService'
+import type { EditorContext } from '@/composables/useEditorContext'
+import { DirectionService } from '@/core/DirectionService'
 
 export function useShortcuts(getContext: () => EditorContext | null) {
   function onKey(e: KeyboardEvent) {

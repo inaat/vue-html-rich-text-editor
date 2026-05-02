@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import MenuBar from './MenuBar.vue'
-import ToolbarRow1 from './ToolbarRow1.vue'
-import ToolbarRow2 from './ToolbarRow2.vue'
-import type { MergeFieldCategory } from '../../types'
+import MenuBar from '@/components/toolbar/MenuBar.vue'
+import ToolbarRow1 from '@/components/toolbar/ToolbarRow1.vue'
+import ToolbarRow2 from '@/components/toolbar/ToolbarRow2.vue'
+import type { MergeFieldCategory } from '@/types'
 
 defineProps<{
   zoom: number

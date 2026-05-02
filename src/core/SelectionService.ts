@@ -1,4 +1,4 @@
-import { BLOCK_TAGS } from './Constants'
+import { BLOCK_TAGS } from '@/core/Constants'
 
 export class SelectionService {
   private savedRange: Range | null = null

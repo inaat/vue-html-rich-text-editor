@@ -1,4 +1,4 @@
-import type { PageSettings } from '../types'
+import type { PageSettings } from '@/types'
 
 export interface ImportResult {
   filename: string

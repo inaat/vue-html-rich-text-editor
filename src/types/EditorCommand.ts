@@ -1,4 +1,4 @@
-import type { EditorApi } from './EditorApi'
+import type { EditorApi } from '@/types/EditorApi'
 
 export type CommandGroup =
   | 'inline'

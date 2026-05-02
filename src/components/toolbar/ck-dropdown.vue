@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import Icon from '../Icon.vue'
+import Icon from '@/components/Icon.vue'
 
 export interface DropdownItem {
   label?: string

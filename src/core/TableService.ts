@@ -1,4 +1,4 @@
-import type { SelectionService } from './SelectionService'
+import type { SelectionService } from '@/core/SelectionService'
 
 export type TableAction =
   | 'row-above' | 'row-below' | 'row-del'

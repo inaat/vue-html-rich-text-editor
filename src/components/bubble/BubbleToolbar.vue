@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useFormatting } from '../../composables/useFormatting'
-import Icon from '../Icon.vue'
-import CkDropdown from '../toolbar/ck-dropdown.vue'
-import CkColorPicker from '../toolbar/ck-color-picker.vue'
-import CkHighlightPicker from '../toolbar/ck-highlight-picker.vue'
+import { useFormatting } from '@/composables/useFormatting'
+import Icon from '@/components/Icon.vue'
+import CkDropdown from '@/components/toolbar/ck-dropdown.vue'
+import CkColorPicker from '@/components/toolbar/ck-color-picker.vue'
+import CkHighlightPicker from '@/components/toolbar/ck-highlight-picker.vue'
 
 defineProps<{
   visible: boolean

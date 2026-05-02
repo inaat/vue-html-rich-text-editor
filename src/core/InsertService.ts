@@ -1,4 +1,4 @@
-import type { SelectionService } from './SelectionService'
+import type { SelectionService } from '@/core/SelectionService'
 
 export class InsertService {
   constructor(private selection: SelectionService) {}

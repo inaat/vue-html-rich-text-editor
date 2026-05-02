@@ -1,5 +1,5 @@
 import type { App } from 'vue'
-import DocxEditor from './components/DocxEditor.vue'
+import DocxEditor from '@/components/DocxEditor.vue'
 
 export interface InstallOptions {
   componentName?: string

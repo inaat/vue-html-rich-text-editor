@@ -1,5 +1,5 @@
-import { PAGE_KEY, LH_KEY } from './Constants'
-import { PAGE_PRESETS, type PageSettings, type PagePreset } from '../types'
+import { PAGE_KEY, LH_KEY } from '@/core/Constants'
+import { PAGE_PRESETS, type PageSettings, type PagePreset } from '@/types'
 
 export class PageService {
   current: PageSettings

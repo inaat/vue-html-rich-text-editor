@@ -1,5 +1,5 @@
-import { ICONS } from '../icons/registry'
-import type { MergeFieldCategory, MergeFieldItem } from '../types/MergeField'
+import { ICONS } from '@/icons/registry'
+import type { MergeFieldCategory, MergeFieldItem } from '@/types/MergeField'
 
 export interface PopupItem {
   label?: string

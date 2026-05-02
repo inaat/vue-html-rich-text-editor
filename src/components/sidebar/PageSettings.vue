@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import { useEditorContext } from '../../composables/useEditorContext'
-import { PAGE_PRESETS, type PagePreset } from '../../types'
+import { useEditorContext } from '@/composables/useEditorContext'
+import { PAGE_PRESETS, type PagePreset } from '@/types'
 
 const ctx = useEditorContext()
 

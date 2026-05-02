@@ -1,6 +1,6 @@
 import { ref, onMounted, onBeforeUnmount, type Ref } from 'vue'
-import type { TableService } from '../core/TableService'
-import type { SelectionService } from '../core/SelectionService'
+import type { TableService } from '@/core/TableService'
+import type { SelectionService } from '@/core/SelectionService'
 
 export interface TableToolsState {
   visible: boolean

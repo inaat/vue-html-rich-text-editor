@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useEditorContext } from '@/composables/useEditorContext'
+import { useLocale } from '@/composables/useLocale'
 import { useFormatting } from '@/composables/useFormatting'
 import { DirectionService } from '@/core/DirectionService'
 import ToolbarButton from '@/components/ToolbarButton.vue'
@@ -12,6 +13,7 @@ import CkListPicker from '@/components/toolbar/ck-list-picker.vue'
 import CkMultilevelPicker from '@/components/toolbar/ck-multilevel-picker.vue'
 
 const ctx = useEditorContext()
+const lc = useLocale()
 const { applyBasic, fontSizeChildren, fontFamilyChildren } = useFormatting()
 const basicDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
 const alignDropdown = ref<InstanceType<typeof CkDropdown> | null>(null)
@@ -114,11 +116,13 @@ function applyList(kind: 'ul' | 'ol', style: string) {
   while (list && list.tagName !== 'UL' && list.tagName !== 'OL') list = list.parentNode as HTMLElement | null
   if (list) list.style.listStyleType = style
 }
-const bulletItems: DropdownItem[] = [
-  { label: 'Disc',   icon: 'list-disc',   onClick: () => applyList('ul', 'disc') },
-  { label: 'Circle', icon: 'list-circle', onClick: () => applyList('ul', 'circle') },
-  { label: 'Square', icon: 'list-square', onClick: () => applyList('ul', 'square') },
-]
+
+const bulletItems = computed<DropdownItem[]>(() => [
+  { label: lc.value.bulletDisc,   icon: 'list-disc',   onClick: () => applyList('ul', 'disc') },
+  { label: lc.value.bulletCircle, icon: 'list-circle', onClick: () => applyList('ul', 'circle') },
+  { label: lc.value.bulletSquare, icon: 'list-square', onClick: () => applyList('ul', 'square') },
+])
+
 function pickBullet(ev: MouseEvent) {
   const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect()
   bulletDropdown.value?.openAt(rect.left, rect.bottom + 2)
@@ -128,19 +132,18 @@ function pickOrdered(ev: MouseEvent) {
   listPickerEl.value?.openAt(rect.left, rect.bottom + 2)
 }
 
-const basicItems: DropdownItem[] = [
-  { label: 'Font Size',     icon: 'font_size',     children: fontSizeChildren,   onClick: () => {} },
-  { label: 'Font Family',   icon: 'font_family',   children: fontFamilyChildren, onClick: () => {} },
-    { label: 'Font Color',    icon: 'font_color',    arrow: true, onClick: () => colorPickerEl.value?.openAt(lastPickerRect.left, lastPickerRect.bottom + 2, 'foreColor') },
-  { label: 'Highlight',     icon: 'remove_color',  arrow: true, onClick: () => highlightPickerEl.value?.openAt(lastPickerRect.left, lastPickerRect.bottom + 2) },
-
-  { label: 'Italic',        icon: 'italic',        shortcut: 'Ctrl+I',           onClick: () => applyBasic('italic') },
-  { label: 'Underline',     icon: 'underline',     shortcut: 'Ctrl+U',           onClick: () => applyBasic('underline') },
-  { label: 'Strikethrough', icon: 'strikethrough', shortcut: 'Ctrl+Shift+X',     onClick: () => applyBasic('strike') },
-  { label: 'Inline Code',   icon: 'code',                                         onClick: () => applyBasic('code') },
-  { label: 'Superscript',   icon: 'superscript',   shortcut: 'Ctrl+.',            onClick: () => applyBasic('sup') },
-  { label: 'Subscript',     icon: 'subscript',     shortcut: 'Ctrl+,',            onClick: () => applyBasic('sub') },
-]
+const basicItems = computed<DropdownItem[]>(() => [
+  { label: lc.value.fontSizeLabel,     icon: 'font_size',     children: fontSizeChildren,   onClick: () => {} },
+  { label: lc.value.fontFamilyLabel,   icon: 'font_family',   children: fontFamilyChildren, onClick: () => {} },
+  { label: lc.value.fontColorLabel,    icon: 'font_color',    arrow: true, onClick: () => colorPickerEl.value?.openAt(lastPickerRect.left, lastPickerRect.bottom + 2, 'foreColor') },
+  { label: lc.value.highlightLabel,    icon: 'remove_color',  arrow: true, onClick: () => highlightPickerEl.value?.openAt(lastPickerRect.left, lastPickerRect.bottom + 2) },
+  { label: lc.value.italicLabel,       icon: 'italic',        shortcut: 'Ctrl+I',       onClick: () => applyBasic('italic') },
+  { label: lc.value.underlineLabel,    icon: 'underline',     shortcut: 'Ctrl+U',       onClick: () => applyBasic('underline') },
+  { label: lc.value.strikethroughLabel,icon: 'strikethrough', shortcut: 'Ctrl+Shift+X', onClick: () => applyBasic('strike') },
+  { label: lc.value.inlineCodeLabel,   icon: 'code',                                    onClick: () => applyBasic('code') },
+  { label: lc.value.superscriptLabel,  icon: 'superscript',   shortcut: 'Ctrl+.',       onClick: () => applyBasic('sup') },
+  { label: lc.value.subscriptLabel,    icon: 'subscript',     shortcut: 'Ctrl+,',       onClick: () => applyBasic('sub') },
+])
 
 function setDir(dir: 'ltr' | 'rtl') {
   const sel = window.getSelection()
@@ -150,14 +153,14 @@ function setDir(dir: 'ltr' | 'rtl') {
   ctx.scheduleSave()
 }
 
-const alignItems: DropdownItem[] = [
-  { label: 'Align Left',    icon: 'align-left',    shortcut: 'Ctrl+Shift+L', onClick: () => ctx.engine.exec('justifyLeft') },
-  { label: 'Align Center',  icon: 'align-center',  shortcut: 'Ctrl+Shift+E', onClick: () => ctx.engine.exec('justifyCenter') },
-  { label: 'Align Right',   icon: 'align-right',   shortcut: 'Ctrl+Shift+R', onClick: () => ctx.engine.exec('justifyRight') },
-  { label: 'Justify',       icon: 'align-justify', shortcut: 'Ctrl+Shift+J', onClick: () => ctx.engine.exec('justifyFull') },
-  { label: 'Left to Right', icon: 'ltr',                                      onClick: () => setDir('ltr') },
-  { label: 'Right to Left', icon: 'rtl',                                      onClick: () => setDir('rtl') },
-]
+const alignItems = computed<DropdownItem[]>(() => [
+  { label: lc.value.alignLeft,    icon: 'align-left',    shortcut: 'Ctrl+Shift+L', onClick: () => ctx.engine.exec('justifyLeft') },
+  { label: lc.value.alignCenter,  icon: 'align-center',  shortcut: 'Ctrl+Shift+E', onClick: () => ctx.engine.exec('justifyCenter') },
+  { label: lc.value.alignRight,   icon: 'align-right',   shortcut: 'Ctrl+Shift+R', onClick: () => ctx.engine.exec('justifyRight') },
+  { label: lc.value.justify,      icon: 'align-justify', shortcut: 'Ctrl+Shift+J', onClick: () => ctx.engine.exec('justifyFull') },
+  { label: lc.value.leftToRight,  icon: 'ltr',                                      onClick: () => setDir('ltr') },
+  { label: lc.value.rightToLeft,  icon: 'rtl',                                      onClick: () => setDir('rtl') },
+])
 
 function pickAlign(ev: MouseEvent) {
   const rect = (ev.currentTarget as HTMLElement).getBoundingClientRect()
@@ -187,69 +190,67 @@ function applyTemplate() {
 
 <template>
   <div class="tb-row">
-    <select v-model="block" class="tb-sel wide" title="Heading" @change="applyBlock">
-      <option value="">Paragraph</option>
-      <option value="h1">Heading 1</option>
-      <option value="h2">Heading 2</option>
-      <option value="h3">Heading 3</option>
-      <option value="h4">Heading 4</option>
-      <option value="h5">Heading 5</option>
-      <option value="h6">Heading 6</option>
-      <option value="blockquote">Block Quote</option>
-      <option value="pre">Code Block</option>
+    <select v-model="block" class="tb-sel wide" :title="lc.paragraph" @change="applyBlock">
+      <option value="">{{ lc.paragraph }}</option>
+      <option value="h1">{{ lc.heading1 }}</option>
+      <option value="h2">{{ lc.heading2 }}</option>
+      <option value="h3">{{ lc.heading3 }}</option>
+      <option value="h4">{{ lc.heading4 }}</option>
+      <option value="h5">{{ lc.heading5 }}</option>
+      <option value="h6">{{ lc.heading6 }}</option>
+      <option value="blockquote">{{ lc.blockQuoteOption }}</option>
+      <option value="pre">{{ lc.codeBlockOption }}</option>
     </select>
-    <select v-model="styleSel" class="tb-sel" title="Styles" @change="applyStyle">
-      <option value="">Styles</option>
-      <option value="default">Default Style</option>
-      <option value="red">Red Heading</option>
-      <option value="blue">Blue Heading</option>
-      <option value="info">Info Box</option>
-      <option value="warn">Warning Box</option>
+    <select v-model="styleSel" class="tb-sel" :title="lc.stylesPlaceholder" @change="applyStyle">
+      <option value="">{{ lc.stylesPlaceholder }}</option>
+      <option value="default">{{ lc.defaultStyle }}</option>
+      <option value="red">{{ lc.redHeading }}</option>
+      <option value="blue">{{ lc.blueHeading }}</option>
+      <option value="info">{{ lc.infoBox }}</option>
+      <option value="warn">{{ lc.warningBox }}</option>
     </select>
     <span class="tb-sep" />
 
-    <ToolbarButton icon="bold" title="Bold (Ctrl+B)" @invoke="ctx.engine.exec('bold')" />
-    <ToolbarButton icon="italic" title="Italic (Ctrl+I)" @invoke="ctx.engine.exec('italic')" />
-    <ToolbarButton icon="underline" title="Underline (Ctrl+U)" @invoke="ctx.engine.exec('underline')" />
-    <ToolbarButton icon="strikethrough" title="Strikethrough (Ctrl+Shift+X)" @invoke="ctx.engine.exec('strikeThrough')" />
-    <ToolbarButton icon="basic_styles" title="Basic styles" has-arrow @invoke="pickBasic" />
+    <ToolbarButton icon="bold" :title="lc.bold" @invoke="ctx.engine.exec('bold')" />
+    <ToolbarButton icon="italic" :title="lc.italic" @invoke="ctx.engine.exec('italic')" />
+    <ToolbarButton icon="underline" :title="lc.underline" @invoke="ctx.engine.exec('underline')" />
+    <ToolbarButton icon="strikethrough" :title="lc.strikethrough" @invoke="ctx.engine.exec('strikeThrough')" />
+    <ToolbarButton icon="basic_styles" :title="lc.basicStyles" has-arrow @invoke="pickBasic" />
     <CkDropdown ref="basicDropdown" :items="basicItems" />
 
     <CkColorPicker ref="colorPickerEl" />
     <CkHighlightPicker ref="highlightPickerEl" />
 
-    <ToolbarButton icon="removeformat" title="Remove Format" @invoke="ctx.engine.exec('removeFormat')" />
+    <ToolbarButton icon="removeformat" :title="lc.removeFormat" @invoke="ctx.engine.exec('removeFormat')" />
     <span class="tb-sep" />
 
-    <ToolbarButton icon="alignment" title="Text alignment" has-arrow @invoke="pickAlign" />
+    <ToolbarButton icon="alignment" :title="lc.textAlignment" has-arrow @invoke="pickAlign" />
     <CkDropdown ref="alignDropdown" :items="alignItems" />
-    <ToolbarButton icon="lineheight" title="Line height" has-arrow @invoke="pickLineHeight" />
+    <ToolbarButton icon="lineheight" :title="lc.lineHeightBtn" has-arrow @invoke="pickLineHeight" />
     <CkDropdown ref="lineHeightDropdown" :items="lineHeightItems" />
     <span class="tb-sep" />
 
- 
-
-    <select v-model="tplSel" class="tb-sel" title="Insert template" @change="applyTemplate">
-      <option value="">Templates</option>
-      <option value="Signature (multi-line)">Signature</option>
-      <option value="Projections Table">Projections Table</option>
-      <option value="Balance Sheet">Balance Sheet</option>
-      <option value="Company Letterhead">Letterhead</option>
+    <select v-model="tplSel" class="tb-sel" :title="lc.templatesPlaceholder" @change="applyTemplate">
+      <option value="">{{ lc.templatesPlaceholder }}</option>
+      <option value="Signature (multi-line)">{{ lc.templateSignature }}</option>
+      <option value="Projections Table">{{ lc.templateProjections }}</option>
+      <option value="Balance Sheet">{{ lc.templateBalance }}</option>
+      <option value="Company Letterhead">{{ lc.templateLetterhead }}</option>
     </select>
-    <ToolbarButton icon="toc" title="Table of contents" @invoke="ctx.insert.toc()" />
+    <ToolbarButton icon="toc" :title="lc.tableOfContents" @invoke="ctx.insert.toc()" />
     <span class="tb-sep" />
 
-    <ToolbarButton icon="bulletlist" title="Bulleted list" has-arrow @invoke="pickBullet" />
+    <ToolbarButton icon="bulletlist" :title="lc.bulletedList" has-arrow @invoke="pickBullet" />
     <CkDropdown ref="bulletDropdown" :items="bulletItems" />
-    <ToolbarButton icon="numberedlist" title="Numbered list" has-arrow @invoke="pickOrdered" />
+    <ToolbarButton icon="numberedlist" :title="lc.numberedList" has-arrow @invoke="pickOrdered" />
     <CkListPicker ref="listPickerEl" @pick="(style) => applyList('ol', style)" />
-    <ToolbarButton icon="multilevel" title="Multi-level list" has-arrow @invoke="pickMultiLevel" />
+    <ToolbarButton icon="multilevel" :title="lc.multiLevelList" has-arrow @invoke="pickMultiLevel" />
     <CkMultilevelPicker ref="multilevelPickerEl" @pick="(l1, l2, l3) => applyMultiLevel(l1, l2, l3)" />
-    <ToolbarButton icon="todolist" title="To-do list" @invoke="ctx.insert.todoList()" />
+    <ToolbarButton icon="todolist" :title="lc.todoList" @invoke="ctx.insert.todoList()" />
     <span class="tb-sep" />
 
-    <ToolbarButton icon="outdent" title="Decrease indent" @invoke="ctx.engine.exec('outdent')" />
-    <ToolbarButton icon="indent" title="Increase indent" @invoke="ctx.engine.exec('indent')" />
+    <ToolbarButton icon="outdent" :title="lc.decreaseIndent" @invoke="ctx.engine.exec('outdent')" />
+    <ToolbarButton icon="indent" :title="lc.increaseIndent" @invoke="ctx.engine.exec('indent')" />
   </div>
 </template>
 

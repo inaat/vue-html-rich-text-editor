@@ -65,6 +65,9 @@ const fields: MergeFieldCategory[] = [
       <button @click="loadFromDatabase">Load</button>
       <button @click="saveToDatabase" :disabled="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
     </div>
-    <DocxEditor v-model="html" :fields="fields" apiBase="http://localhost:3001" />
+    <DocxEditor v-model="html" :fields="fields" apiBase="http://localhost:3001"
+     lang="ar" 
+    
+    />
   </div>
 </template>

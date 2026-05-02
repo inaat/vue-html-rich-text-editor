@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useEditorContext } from '@/composables/useEditorContext'
+import { useLocale } from '@/composables/useLocale'
 import { pickFile } from '@/core/InsertService'
 import ToolbarButton from '@/components/ToolbarButton.vue'
 import Icon from '@/components/Icon.vue'
@@ -14,6 +15,7 @@ const props = defineProps<{
 }>()
 
 const ctx = useEditorContext()
+const lc = useLocale()
 const emit = defineEmits<{
   (e: 'toggle-source'): void
   (e: 'open-heading-menu'): void
@@ -30,7 +32,7 @@ const spellOn = ref(true)
 function toggleSpellcheck() {
   spellOn.value = !spellOn.value
   if (ctx.root) ctx.root.setAttribute('spellcheck', String(spellOn.value))
-  ctx.setStatus(spellOn.value ? 'Spellcheck on' : 'Spellcheck off', 'ok')
+  ctx.setStatus(spellOn.value ? lc.value.spellcheckOnMsg : lc.value.spellcheckOffMsg, 'ok')
 }
 
 const highlightColor = ref('#fff59d')
@@ -40,21 +42,21 @@ function applyHighlight(ev: Event) {
   ctx.engine.exec('hiliteColor', target.value)
 }
 function insertMath() {
-  const tex = prompt('Math (LaTeX), wrapped as \\(...\\):')
+  const tex = prompt(lc.value.promptMath)
   if (tex) ctx.insert.math(tex)
 }
 
 async function pickImage(ev: MouseEvent) {
   ctx.popup.showMenu(ev.currentTarget as HTMLElement, [
-    { label: 'Upload from computer', icon: 'image', onClick: async () => {
+    { label: lc.value.uploadFromComputer, icon: 'image', onClick: async () => {
       const f = await pickFile('image/*')
       if (f) await ctx.insert.imageFromFile(f)
     } },
-    { label: 'Insert with file manager', icon: 'filemanager', onClick: async () => {
+    { label: lc.value.fileManager, icon: 'filemanager', onClick: async () => {
       const f = await pickFile('image/*')
       if (f) await ctx.insert.imageFromFile(f)
     } },
-    { label: 'Insert via URL', icon: 'link', onClick: () => emit('open-image-url') }
+    { label: lc.value.insertViaUrl, icon: 'link', onClick: () => emit('open-image-url') }
   ])
 }
 
@@ -68,15 +70,15 @@ function pickTable(ev: MouseEvent) {
 }
 
 function insertVideo() {
-  const url = prompt('Video URL (YouTube/Vimeo or .mp4):')
+  const url = prompt(lc.value.promptVideo)
   if (url) ctx.insert.video(url)
 }
 function insertEmbed() {
-  const html = prompt('Paste HTML to embed:')
+  const html = prompt(lc.value.promptEmbed)
   if (html) ctx.insert.embed(html)
 }
 function insertSymbol() {
-  const ch = prompt('Special character (e.g. © ™ ° ± × ÷ Ω π ∞):', '©')
+  const ch = prompt(lc.value.promptSpecialChar, '©')
   if (ch) ctx.insert.symbol(ch)
 }
 function insertEmoji(ev: MouseEvent) {
@@ -91,7 +93,7 @@ function insertLink(ev: MouseEvent) {
 }
 function insertMergeField() {
   ctx.selection.remember()
-  const name = prompt('Merge field name (e.g. customer.name):', 'field')
+  const name = prompt(lc.value.promptMergeField, 'field')
   if (name) ctx.insert.mergeField(name)
 }
 function pickMergeField(ev: MouseEvent) {
@@ -112,7 +114,7 @@ function pickMergeField(ev: MouseEvent) {
       { label: 'invoice.date', onClick: () => ctx.insert.mergeField('invoice.date') },
       { label: 'invoice.total', onClick: () => ctx.insert.mergeField('invoice.total') },
       { separator: true },
-      { label: 'Custom field…', onClick: insertMergeField }
+      { label: lc.value.customField, onClick: insertMergeField }
     ])
   }
 }
@@ -120,7 +122,7 @@ function insertFootnote() {
   ctx.insert.footnote()
 }
 function insertBookmark() {
-  const n = prompt('Bookmark name:')
+  const n = prompt(lc.value.promptBookmark)
   if (n) ctx.insert.bookmark(n)
 }
 function insertCodeBlock() {
@@ -134,11 +136,11 @@ function pickElement(ev: MouseEvent) {
 }
 function pickCaseChange(ev: MouseEvent) {
   ctx.popup.showMenu(ev.currentTarget as HTMLElement, [
-    { label: 'UPPER CASE', onClick: () => ctx.insert.caseChange('upper') },
-    { label: 'lower case', onClick: () => ctx.insert.caseChange('lower') },
-    { label: 'Title Case', onClick: () => ctx.insert.caseChange('title') },
-    { label: 'Sentence case', onClick: () => ctx.insert.caseChange('sentence') },
-    { label: 'tOGGLE cASE', onClick: () => ctx.insert.caseChange('toggle') }
+    { label: lc.value.upperCase,    onClick: () => ctx.insert.caseChange('upper') },
+    { label: lc.value.lowerCase,    onClick: () => ctx.insert.caseChange('lower') },
+    { label: lc.value.titleCase,    onClick: () => ctx.insert.caseChange('title') },
+    { label: lc.value.sentenceCase, onClick: () => ctx.insert.caseChange('sentence') },
+    { label: lc.value.toggleCase,   onClick: () => ctx.insert.caseChange('toggle') }
   ])
 }
 function findReplace() {
@@ -152,68 +154,68 @@ function selectAll() {
   sel?.addRange(range)
 }
 function startPaint() {
-  if (ctx.paint.start()) ctx.setStatus('Format painter active — select text to apply', 'ok')
+  if (ctx.paint.start()) ctx.setStatus(lc.value.paintFormatActive, 'ok')
 }
 function quoteBlock() { ctx.engine.exec('formatBlock', '<blockquote>') }
 </script>
 
 <template>
   <div class="tb-row">
-    <ToolbarButton icon="undo" title="Undo (Ctrl+Z)" @invoke="ctx.engine.exec('undo')" />
-    <ToolbarButton icon="redo" title="Redo (Ctrl+Y)" @invoke="ctx.engine.exec('redo')" />
+    <ToolbarButton icon="undo" :title="lc.undo" @invoke="ctx.engine.exec('undo')" />
+    <ToolbarButton icon="redo" :title="lc.redo" @invoke="ctx.engine.exec('redo')" />
     <span class="tb-sep" />
 
     <div class="tb-split">
-      <ToolbarButton icon="mergefield" title="Insert merge field" @invoke="insertMergeField" />
-      <button type="button" class="tb-arr" title="Choose merge field" @mousedown.prevent @click="pickMergeField">
+      <ToolbarButton icon="mergefield" :title="lc.insertMergeField" @invoke="insertMergeField" />
+      <button type="button" class="tb-arr" :title="lc.chooseMergeField" @mousedown.prevent @click="pickMergeField">
         <svg viewBox="0 0 10 10"><path d="M.941 4.523a.75.75 0 1 1 1.06-1.06l3.006 3.005 3.005-3.005a.75.75 0 1 1 1.06 1.06l-3.549 3.55a.75.75 0 0 1-1.168-.136z"/></svg>
       </button>
     </div>
     <span class="tb-sep" />
 
-    <ToolbarButton icon="word-import" title="Import from Word / HTML" @invoke="emit('import-files')" />
-    <ToolbarButton icon="word-export" title="Export to Word" @invoke="ctx.export.toWordDoc(ctx.getFilename())" />
-    <ToolbarButton icon="pdf" title="Export to PDF" @invoke="ctx.export.toPdf(ctx.page.current, ctx.getFilename())" />
-    <ToolbarButton icon="print" title="Print" @invoke="ctx.export.preview(ctx.getFilename(), ctx.page.current)" />
+    <ToolbarButton icon="word-import" :title="lc.importFromWord" @invoke="emit('import-files')" />
+    <ToolbarButton icon="word-export" :title="lc.exportToWord" @invoke="ctx.export.toWordDoc(ctx.getFilename())" />
+    <ToolbarButton icon="pdf" :title="lc.exportToPdf" @invoke="ctx.export.toPdf(ctx.page.current, ctx.getFilename())" />
+    <ToolbarButton icon="print" :title="lc.print" @invoke="ctx.export.preview(ctx.getFilename(), ctx.page.current)" />
     <span class="tb-sep" />
 
-    <ToolbarButton icon="paint" title="Paint formatting (Ctrl+Alt+C)" @invoke="startPaint" />
-    <ToolbarButton icon="casechange" title="Case change (Shift+F3)" has-arrow @invoke="pickCaseChange" />
-    <ToolbarButton icon="findreplace" title="Find and replace (Ctrl+F)" @invoke="findReplace" />
-    <ToolbarButton icon="selectall" title="Select all (Ctrl+A)" @invoke="selectAll" />
-    <ToolbarButton icon="spellcheck" :title="spellOn ? 'Spellcheck (on)' : 'Spellcheck (off)'" :active="spellOn" @invoke="toggleSpellcheck" />
+    <ToolbarButton icon="paint" :title="lc.paintFormat" @invoke="startPaint" />
+    <ToolbarButton icon="casechange" :title="lc.caseChange" has-arrow @invoke="pickCaseChange" />
+    <ToolbarButton icon="findreplace" :title="lc.findAndReplace" @invoke="findReplace" />
+    <ToolbarButton icon="selectall" :title="lc.selectAll" @invoke="selectAll" />
+    <ToolbarButton icon="spellcheck" :title="spellOn ? lc.spellcheckOn : lc.spellcheckOff" :active="spellOn" @invoke="toggleSpellcheck" />
     <span class="tb-sep" />
 
-    <label class="tb tb-color" title="Highlight color">
+    <label class="tb tb-color" :title="lc.highlightColor">
       <span class="hl-letter">A</span>
       <span class="hl-bar" :style="{ background: highlightColor }" />
       <input type="color" :value="highlightColor" @input="applyHighlight" />
     </label>
-    <ToolbarButton icon="link" title="Link (Ctrl+K)" @invoke="insertLink" />
-    <ToolbarButton icon="footnote" title="Insert footnote" @invoke="insertFootnote" />
-    <ToolbarButton icon="bookmark" title="Bookmark" @invoke="insertBookmark" />
+    <ToolbarButton icon="link" :title="lc.insertLink" @invoke="insertLink" />
+    <ToolbarButton icon="footnote" :title="lc.insertFootnote" @invoke="insertFootnote" />
+    <ToolbarButton icon="bookmark" :title="lc.insertBookmark" @invoke="insertBookmark" />
     <span class="tb-sep" />
 
-    <ToolbarButton icon="image" title="Insert image" has-arrow @invoke="pickImage" />
-    <ToolbarButton icon="filemanager" title="File manager" @invoke="pickAttachedFile" />
-    <ToolbarButton icon="table" title="Insert table" has-arrow @invoke="pickTable" />
-    <ToolbarButton icon="blockquote" title="Block quote" @invoke="quoteBlock" />
-    <ToolbarButton icon="media" title="Insert video / media" @invoke="insertVideo" />
-    <ToolbarButton icon="embed" title="Embed HTML" @invoke="insertEmbed" />
-    <ToolbarButton icon="htmlblock" title="Insert HTML element" has-arrow @invoke="pickElement" />
-    <ToolbarButton icon="codeblock" title="Insert code block" @invoke="insertCodeBlock" />
-    <ToolbarButton icon="pagebreak" title="Page break" @invoke="ctx.insert.pageBreak()" />
-    <ToolbarButton icon="hrule" title="Horizontal line" @invoke="ctx.insert.hr()" />
-    <ToolbarButton icon="emoji" title="Emoji" has-arrow @invoke="insertEmoji" />
-    <ToolbarButton icon="special" title="Special characters" @invoke="insertSymbol" />
-    <ToolbarButton icon="math" title="Math equation" @invoke="insertMath" />
-    <ToolbarButton icon="source" title="Toggle HTML source" @invoke="emit('toggle-source')" />
+    <ToolbarButton icon="image" :title="lc.insertImage" has-arrow @invoke="pickImage" />
+    <ToolbarButton icon="filemanager" :title="lc.fileManager" @invoke="pickAttachedFile" />
+    <ToolbarButton icon="table" :title="lc.insertTable" has-arrow @invoke="pickTable" />
+    <ToolbarButton icon="blockquote" :title="lc.blockQuote" @invoke="quoteBlock" />
+    <ToolbarButton icon="media" :title="lc.insertMedia" @invoke="insertVideo" />
+    <ToolbarButton icon="embed" :title="lc.embedHtml" @invoke="insertEmbed" />
+    <ToolbarButton icon="htmlblock" :title="lc.insertHtmlElement" has-arrow @invoke="pickElement" />
+    <ToolbarButton icon="codeblock" :title="lc.insertCodeBlock" @invoke="insertCodeBlock" />
+    <ToolbarButton icon="pagebreak" :title="lc.pageBreak" @invoke="ctx.insert.pageBreak()" />
+    <ToolbarButton icon="hrule" :title="lc.horizontalLine" @invoke="ctx.insert.hr()" />
+    <ToolbarButton icon="emoji" :title="lc.insertEmoji" has-arrow @invoke="insertEmoji" />
+    <ToolbarButton icon="special" :title="lc.specialChars" @invoke="insertSymbol" />
+    <ToolbarButton icon="math" :title="lc.mathEquation" @invoke="insertMath" />
+    <ToolbarButton icon="source" :title="lc.toggleSource" @invoke="emit('toggle-source')" />
 
     <div class="tb-spacer">
-      <button type="button" class="tb" title="Zoom out" @click="emit('zoom-out')"><Icon name="zoomout" /></button>
+      <button type="button" class="tb" :title="lc.zoomOut" @click="emit('zoom-out')"><Icon name="zoomout" /></button>
       <span class="tb-zoom-label">{{ zoom }}%</span>
-      <button type="button" class="tb" title="Zoom in" @click="emit('zoom-in')"><Icon name="zoomin" /></button>
-      <ToolbarButton :icon="'fullscreen'" :title="fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'" @invoke="emit('toggle-fullscreen')" />
+      <button type="button" class="tb" :title="lc.zoomIn" @click="emit('zoom-in')"><Icon name="zoomin" /></button>
+      <ToolbarButton :icon="'fullscreen'" :title="fullscreen ? lc.exitFullscreen : lc.enterFullscreen" @invoke="emit('toggle-fullscreen')" />
     </div>
   </div>
 </template>

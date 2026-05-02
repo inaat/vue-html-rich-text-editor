@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useEditorContext } from '@/composables/useEditorContext'
+import { useLocale } from '@/composables/useLocale'
 import { rgbToHex } from '@/core/Format'
 
 const ctx = useEditorContext()
+const lc = useLocale()
 
 const tagLabel = ref('—')
 const breadcrumb = ref<HTMLElement[]>([])
@@ -290,20 +292,20 @@ onBeforeUnmount(() => {
 <template>
   <div class="style-panel">
     <div class="sp-doc-dir">
-      <span class="sp-tag-label">Document:</span>
-      <button type="button" class="sp-dir-btn" @mousedown.prevent @click="setDocumentDir('ltr')">LTR</button>
-      <button type="button" class="sp-dir-btn" @mousedown.prevent @click="setDocumentDir('rtl')">RTL</button>
+      <span class="sp-tag-label">{{ lc.docDirection }}</span>
+      <button type="button" class="sp-dir-btn" @mousedown.prevent @click="setDocumentDir('ltr')">{{ lc.ltr }}</button>
+      <button type="button" class="sp-dir-btn" @mousedown.prevent @click="setDocumentDir('rtl')">{{ lc.rtl }}</button>
     </div>
     <div class="sp-tag-row">
-      <span class="sp-tag-label">Selected:</span>
+      <span class="sp-tag-label">{{ lc.selectedElement }}</span>
       <span class="sp-tag">{{ tagLabel }}</span>
-      <button type="button" class="sp-dir-btn" title="Set LTR on element" :disabled="!active" @mousedown.prevent @click="setElementDir('ltr')">LTR</button>
-      <button type="button" class="sp-dir-btn" title="Set RTL on element" :disabled="!active" @mousedown.prevent @click="setElementDir('rtl')">RTL</button>
-      <button type="button" class="sp-child-btn" title="Insert child element" :disabled="!active" @mousedown.prevent @click="insertChild">＋child</button>
-      <button type="button" class="sp-del" title="Delete this element" @click="deleteEl">🗑</button>
+      <button type="button" class="sp-dir-btn" :title="lc.setLtrOnElement" :disabled="!active" @mousedown.prevent @click="setElementDir('ltr')">{{ lc.ltr }}</button>
+      <button type="button" class="sp-dir-btn" :title="lc.setRtlOnElement" :disabled="!active" @mousedown.prevent @click="setElementDir('rtl')">{{ lc.rtl }}</button>
+      <button type="button" class="sp-child-btn" :title="lc.insertChildEl" :disabled="!active" @mousedown.prevent @click="insertChild">{{ lc.addChildBtn }}</button>
+      <button type="button" class="sp-del" :title="lc.deleteElement" @click="deleteEl">🗑</button>
     </div>
     <div class="sp-breadcrumb">
-      <span v-if="!breadcrumb.length">— click into editor —</span>
+      <span v-if="!breadcrumb.length">{{ lc.clickIntoEditor }}</span>
       <span
         v-for="(node, i) in breadcrumb"
         :key="i"
@@ -321,19 +323,19 @@ onBeforeUnmount(() => {
     </div>
 
     <details open>
-      <summary>Size</summary>
+      <summary>{{ lc.sizeSection }}</summary>
       <div class="sp-row">
-        <label>W <input :value="values.width" placeholder="auto" @input="onFieldInput('width', $event)" /></label>
-        <label>H <input :value="values.height" placeholder="auto" @input="onFieldInput('height', $event)" /></label>
+        <label>{{ lc.widthLabel }} <input :value="values.width" placeholder="auto" @input="onFieldInput('width', $event)" /></label>
+        <label>{{ lc.heightLabel }} <input :value="values.height" placeholder="auto" @input="onFieldInput('height', $event)" /></label>
       </div>
       <div class="sp-row">
-        <label>Line-height <input :value="values.lineHeight" placeholder="normal" @input="onFieldInput('lineHeight', $event, true)" /></label>
-        <label>Font size <input :value="values.fontSize" placeholder="inherit" @input="onFieldInput('fontSize', $event)" /></label>
+        <label>{{ lc.lineHeightLabel }} <input :value="values.lineHeight" placeholder="normal" @input="onFieldInput('lineHeight', $event, true)" /></label>
+        <label>{{ lc.fontSizePanelLabel }} <input :value="values.fontSize" placeholder="inherit" @input="onFieldInput('fontSize', $event)" /></label>
       </div>
     </details>
 
     <details>
-      <summary>Padding</summary>
+      <summary>{{ lc.paddingSection }}</summary>
       <div class="sp-grid">
         <label>T <input :value="values.paddingTop" @input="onFieldInput('paddingTop', $event)" /></label>
         <label>R <input :value="values.paddingRight" @input="onFieldInput('paddingRight', $event)" /></label>
@@ -343,7 +345,7 @@ onBeforeUnmount(() => {
     </details>
 
     <details>
-      <summary>Margin</summary>
+      <summary>{{ lc.marginSection }}</summary>
       <div class="sp-grid">
         <label>T <input :value="values.marginTop" @input="onFieldInput('marginTop', $event)" /></label>
         <label>R <input :value="values.marginRight" @input="onFieldInput('marginRight', $event)" /></label>
@@ -353,7 +355,7 @@ onBeforeUnmount(() => {
     </details>
 
     <details>
-      <summary>Border</summary>
+      <summary>{{ lc.borderSection }}</summary>
       <div class="sp-grid">
         <label>T <input :value="values.borderTopWidth" @input="onFieldInput('borderTopWidth', $event)" /></label>
         <label>R <input :value="values.borderRightWidth" @input="onFieldInput('borderRightWidth', $event)" /></label>
@@ -378,7 +380,7 @@ onBeforeUnmount(() => {
     </details>
 
     <details>
-      <summary>Color</summary>
+      <summary>{{ lc.colorSection }}</summary>
       <div class="sp-row">
         <label>BG   <input type="color" :value="colors.backgroundColor" @input="onColorChange('backgroundColor', $event)" /></label>
         <label>Text <input type="color" :value="colors.color" @input="onColorChange('color', $event)" /></label>
@@ -386,9 +388,9 @@ onBeforeUnmount(() => {
     </details>
 
     <details>
-      <summary>All properties</summary>
-      <input v-model="filter" type="search" class="sp-filter" placeholder="filter (e.g. flex, grid, font…)">
-      <label class="sp-toggle"><input v-model="showAll" type="checkbox" @change="renderAll(active)"> show every property</label>
+      <summary>{{ lc.allPropsSection }}</summary>
+      <input v-model="filter" type="search" class="sp-filter" :placeholder="lc.filterPropsPlaceholder">
+      <label class="sp-toggle"><input v-model="showAll" type="checkbox" @change="renderAll(active)"> {{ lc.showEveryProp }}</label>
       <div class="sp-all">
         <div
           v-for="row in filteredProps"
@@ -407,7 +409,7 @@ onBeforeUnmount(() => {
       </div>
     </details>
 
-    <button type="button" class="btn-secondary" @click="clearStyles">Clear inline styles</button>
+    <button type="button" class="btn-secondary" @click="clearStyles">{{ lc.clearInlineStyles }}</button>
   </div>
 </template>
 

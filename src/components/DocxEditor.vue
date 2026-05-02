@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, toRef, watch } from 'vue'
+import { ref, computed, toRef, watch, provide } from 'vue'
 import '@/styles/editor.css'
 import { useEditor } from '@/composables/useEditor'
 import { provideEditorContext } from '@/composables/useEditorContext'
@@ -11,6 +11,8 @@ import { useShortcuts } from '@/composables/useShortcuts'
 import { formatBytes } from '@/core/Format'
 import { DirectionService } from '@/core/DirectionService'
 import type { DocumentMeta, MergeFieldCategory } from '@/types'
+import { LOCALE_KEY, resolveLabels } from '@/core/Locale'
+import type { Labels } from '@/core/Locale'
 import { EMPTY_META } from '@/types'
 import Toolbar from '@/components/toolbar/Toolbar.vue'
 import EditorPane from '@/components/EditorPane.vue'
@@ -28,6 +30,8 @@ const props = withDefaults(defineProps<{
   modelValue?: string
   apiBase?: string
   fields?: MergeFieldCategory[]
+  lang?: string
+  labels?: Partial<Labels>
 }>(), { modelValue: '' })
 
 const emit = defineEmits<{
@@ -98,6 +102,9 @@ watch(() => context.value, (c) => { if (c) recountStats() })
 provideEditorContext(new Proxy({} as any, {
   get(_t, key) { return (context.value as any)?.[key] }
 }))
+
+const resolvedLabels = computed(() => resolveLabels(props.lang, props.labels))
+provide(LOCALE_KEY, resolvedLabels)
 
 function toolbarBottom(): number {
   const el = (toolbarRef.value as any)?.rootEl as HTMLElement | undefined
@@ -216,7 +223,7 @@ async function onFileChange() {
 
 function onEditorMouseup() {
   const ctx = context.value
-  if (ctx?.paint.active && ctx.paint.apply()) ctx.setStatus('Format applied', 'ok')
+  if (ctx?.paint.active && ctx.paint.apply()) ctx.setStatus(resolvedLabels.value.formatApplied, 'ok')
 }
 
 function focusCellEnd(cell: HTMLTableCellElement) {
@@ -437,12 +444,12 @@ const statusClasses = computed(() => `status floating ${status.value.kind} ${sta
 
     <div class="statusbar">
       <span class="sb-dot" />
-      <span>Ready</span>
+      <span>{{ resolvedLabels.statusReady }}</span>
       <span class="sb-div" />
-      <span>Words: {{ wordCount }}</span>
-      <span>Characters: {{ charCount }}</span>
+      <span>{{ resolvedLabels.statusWords }}: {{ wordCount }}</span>
+      <span>{{ resolvedLabels.statusChars }}: {{ charCount }}</span>
       <span class="sb-div" />
-      <span>{{ pageCount }} {{ pageCount === 1 ? 'page' : 'pages' }}</span>
+      <span>{{ pageCount }} {{ pageCount === 1 ? resolvedLabels.statusPage : resolvedLabels.statusPages }}</span>
       <span class="sb-spacer" />
       <span class="sb-branding">✓ </span>
     </div>

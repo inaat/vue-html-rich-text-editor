@@ -143,7 +143,8 @@ body {
   color: var(--fg1);
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 .rte-root.is-fullscreen {
   position: fixed; inset: 0; z-index: 9999; height: 100vh;

@@ -66,8 +66,18 @@ function applyStyle() {
   styleSel.value = ''
 }
 function applyFontSize(size: string) {
-  if (size) ctx.engine.exec('fontSize', size)
-  else document.execCommand('removeFormat')
+  if (!size) { document.execCommand('removeFormat'); return }
+  // execCommand('fontSize') only accepts 1-7; use 7 as a marker then swap with a real px span
+  const before = new Set(ctx.root.querySelectorAll('font[size="7"]'))
+  ctx.engine.exec('fontSize', '7')
+  for (const font of ctx.root.querySelectorAll('font[size="7"]')) {
+    if (before.has(font)) continue
+    const span = document.createElement('span')
+    span.style.fontSize = size + 'px'
+    while (font.firstChild) span.appendChild(font.firstChild)
+    font.replaceWith(span)
+  }
+  ctx.scheduleSave()
 }
 function applyFontFamily(family: string) {
   if (family) document.execCommand('fontName', false, family)

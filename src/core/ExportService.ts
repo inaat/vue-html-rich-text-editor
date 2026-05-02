@@ -80,9 +80,14 @@ ${ARABIC_FONTS}
       return
     }
 
-    // Use html2pdf's string mode — it manages the temporary element internally,
-    // avoiding all visibility/z-index issues with manually appended DOM elements.
-    const htmlContent = `<div style="font:11pt/1.4 Calibri,'Segoe UI',Arial,${ARABIC_FONT_FAMILY},sans-serif;color:#111;background:#fff">` +
+    const toMm = (px: number) => +(px / 96 * 25.4).toFixed(1)
+    const pageWmm = toMm(p.w)
+    const pageHmm = toMm(p.h)
+
+    // Wrap with full page width + padding so RTL content can't overflow left of the capture area
+    const htmlContent =
+      `<div style="width:${p.w}px;padding:${p.pT}px ${p.pR}px ${p.pB}px ${p.pL}px;` +
+      `font:11pt/1.4 Calibri,'Segoe UI',Arial,${ARABIC_FONT_FAMILY},sans-serif;color:#111;background:#fff;box-sizing:border-box">` +
       `<style>` +
       `img{max-width:100%;height:auto}` +
       `table{border-collapse:collapse;width:100%}` +
@@ -100,13 +105,12 @@ ${ARABIC_FONTS}
       this.cleanHtml(this.root.innerHTML) +
       `</div>`
 
-    const mmPad = (px: number) => +(px / 96 * 25.4).toFixed(1)
     await h2p().set({
-      margin:      [mmPad(p.pT), mmPad(p.pR), mmPad(p.pB), mmPad(p.pL)],
+      margin:      0,
       filename:    `${name}.pdf`,
       image:       { type: 'jpeg', quality: 0.97 },
-      html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
-      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true, width: p.w },
+      jsPDF:       { unit: 'mm', format: [pageWmm, pageHmm], orientation: 'portrait' },
       pagebreak:   { mode: ['avoid-all', 'css', 'legacy'] },
     }).from(htmlContent, 'string').save()
   }

@@ -7,6 +7,10 @@ const ARABIC_FONTS = `
 
 const ARABIC_FONT_FAMILY = `'IBM Plex Arabic', 'Noto Sans Arabic', 'Cairo', 'Amiri'`
 
+// Minimal type for the dynamically-loaded html2pdf.js bundle
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type H2P = () => any
+
 export class ExportService {
   constructor(private root: HTMLElement) {}
 
@@ -69,97 +73,64 @@ ${ARABIC_FONTS}
   async toPdf(page?: PageSettings | null, filename?: string): Promise<void> {
     const p = page ?? { w: 816, h: 1056, pT: 96, pR: 96, pB: 96, pL: 96, preset: 'letter' as const }
     const name = (filename || 'document').replace(/\.pdf$/i, '')
-    const content = this.cleanHtml(this.root.innerHTML)
 
-    // Build a styled container rendered off-screen in the current page
-    // (inherits already-loaded fonts including Arabic)
-    const wrap = document.createElement('div')
-    wrap.style.cssText = [
-      'position:fixed', 'top:0', 'left:-9999px',
-      `width:${p.w}px`,
-      'background:#fff',
-      `padding:${p.pT}px ${p.pR}px ${p.pB}px ${p.pL}px`,
-      `font:11pt/1.4 Calibri,"Segoe UI",Arial,${ARABIC_FONT_FAMILY},sans-serif`,
-      'color:#111',
-    ].join(';')
-    wrap.innerHTML = content
-    document.body.appendChild(wrap)
-
-    // Inline a minimal style tag so tables/images render correctly
-    const style = document.createElement('style')
-    style.textContent = `
-      img{max-width:100%;height:auto}
-      table{border-collapse:collapse;width:100%}
-      th,td{border:1px solid #888;padding:4px 8px;vertical-align:top}
-      blockquote{margin:1em 0;padding:.4em 1em;border-left:3px solid #d0d4da;color:#4b5563}
-      pre{background:#0f172a;color:#e2e8f0;padding:12px;border-radius:6px;font:13px/1.5 monospace}
-      code{background:#f0f2f5;padding:1px 4px;border-radius:3px}
-      pre code{background:transparent;padding:0}
-      p,li,th,td,h1,h2,h3,h4,h5,h6,blockquote{unicode-bidi:plaintext}
-      .pagebreak{page-break-after:always;height:0;margin:0}
-      .pagebreak .pb-label,.pagebreak .pb-delete{display:none}
-      .merge-field{background:#dbeafe;padding:0 2px;border-radius:2px}
-    `
-    wrap.prepend(style)
-
-    try {
-      const h2p = await this._loadHtml2Pdf()
-      if (!h2p) throw new Error('load failed')
-
-      const mmPad = (px: number) => +(px / 96 * 25.4).toFixed(1)
-      await h2p().set({
-        margin: [mmPad(p.pT), mmPad(p.pR), mmPad(p.pB), mmPad(p.pL)],
-        filename: `${name}.pdf`,
-        image: { type: 'jpeg', quality: 0.97 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
-      }).from(wrap).save()
-    } catch {
-      // Fallback: open a clean print popup
-      this._printPopup(content, p, name)
-    } finally {
-      document.body.removeChild(wrap)
+    const h2p = await this._loadHtml2Pdf()
+    if (!h2p) {
+      alert('Could not load PDF library. Check your internet connection and try again.')
+      return
     }
+
+    // Use html2pdf's string mode — it manages the temporary element internally,
+    // avoiding all visibility/z-index issues with manually appended DOM elements.
+    const htmlContent = `<div style="font:11pt/1.4 Calibri,'Segoe UI',Arial,${ARABIC_FONT_FAMILY},sans-serif;color:#111;background:#fff">` +
+      `<style>` +
+      `img{max-width:100%;height:auto}` +
+      `table{border-collapse:collapse;width:100%}` +
+      `th,td{border:1px solid #888;padding:4px 8px;vertical-align:top}` +
+      `blockquote{margin:1em 0;padding:.4em 1em;border-left:3px solid #d0d4da;color:#4b5563}` +
+      `pre{background:#0f172a;color:#e2e8f0;padding:12px;border-radius:6px;font:13px/1.5 monospace}` +
+      `code{background:#f0f2f5;padding:1px 4px;border-radius:3px}` +
+      `pre code{background:transparent;padding:0}` +
+      `p,li,th,td,h1,h2,h3,h4,h5,h6,blockquote{unicode-bidi:plaintext}` +
+      `[dir=rtl],*:lang(ar){font-family:${ARABIC_FONT_FAMILY},sans-serif}` +
+      `.pagebreak{page-break-after:always;height:0;margin:0}` +
+      `.pagebreak .pb-label,.pagebreak .pb-delete{display:none}` +
+      `.merge-field{background:#dbeafe;padding:0 2px;border-radius:2px}` +
+      `</style>` +
+      this.cleanHtml(this.root.innerHTML) +
+      `</div>`
+
+    const mmPad = (px: number) => +(px / 96 * 25.4).toFixed(1)
+    await h2p().set({
+      margin:      [mmPad(p.pT), mmPad(p.pR), mmPad(p.pB), mmPad(p.pL)],
+      filename:    `${name}.pdf`,
+      image:       { type: 'jpeg', quality: 0.97 },
+      html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
+      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:   { mode: ['avoid-all', 'css', 'legacy'] },
+    }).from(htmlContent, 'string').save()
   }
 
-  private async _loadHtml2Pdf(): Promise<((el?: HTMLElement) => unknown) | null> {
-    if ((window as Record<string, unknown>).html2pdf) {
-      return (window as Record<string, unknown>).html2pdf as (el?: HTMLElement) => unknown
+  private _h2p: H2P | null = null
+
+  private _loadHtml2Pdf(): Promise<H2P | null> {
+    if (this._h2p) return Promise.resolve(this._h2p)
+    const w = window as unknown as Record<string, unknown>
+    if (typeof w['html2pdf'] === 'function') {
+      this._h2p = w['html2pdf'] as H2P
+      return Promise.resolve(this._h2p)
     }
     return new Promise((resolve) => {
       const s = document.createElement('script')
       s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js'
-      s.onload = () => resolve((window as Record<string, unknown>).html2pdf as (el?: HTMLElement) => unknown)
+      s.onload = () => {
+        const fn = (window as unknown as Record<string, unknown>)['html2pdf']
+        this._h2p = typeof fn === 'function' ? fn as H2P : null
+        resolve(this._h2p)
+      }
       s.onerror = () => resolve(null)
       document.head.appendChild(s)
     })
-  }
-
-  private _printPopup(content: string, p: PageSettings, name: string): void {
-    const doc = `<!doctype html><html><head><meta charset="utf-8"><title>${name}</title>
-${ARABIC_FONTS}
-<style>
-  *,*::before,*::after{box-sizing:border-box}
-  html,body{margin:0;background:#fff}
-  body{font:11pt/1.4 Calibri,"Segoe UI",Arial,${ARABIC_FONT_FAMILY},sans-serif;color:#111;
-    padding:${p.pT}px ${p.pR}px ${p.pB}px ${p.pL}px}
-  [dir=rtl],*:lang(ar){font-family:${ARABIC_FONT_FAMILY},sans-serif}
-  img{max-width:100%;height:auto}
-  table{border-collapse:collapse;width:100%}
-  th,td{border:1px solid #888;padding:4px 8px;vertical-align:top}
-  p,li,th,td,h1,h2,h3,h4,h5,h6,blockquote{unicode-bidi:plaintext}
-  .pagebreak{page-break-after:always;height:0;margin:0}
-  .pagebreak .pb-label,.pagebreak .pb-delete{display:none}
-  @page{size:A4;margin:0}
-</style></head>
-<body>${content}
-<script>window.addEventListener('load',()=>{window.print();window.addEventListener('afterprint',()=>window.close())})<\/script>
-</body></html>`
-    const url = URL.createObjectURL(new Blob([doc], { type: 'text/html;charset=utf-8' }))
-    const win = window.open(url, '_blank', 'width=960,height=820,menubar=no,toolbar=no')
-    if (!win) { URL.revokeObjectURL(url); alert('Allow popups for PDF export') }
-    else setTimeout(() => URL.revokeObjectURL(url), 120_000)
   }
 
   preview(filename: string, page: PageSettings | null): void {
@@ -172,16 +143,35 @@ ${ARABIC_FONTS}
 <style>
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;background:#e5e7eb}
-  body{font-family:Calibri,Arial,${ARABIC_FONT_FAMILY},sans-serif;color:#111;padding:24px 0;${lhRule}}
+  body{font-family:Calibri,Arial,${ARABIC_FONT_FAMILY},sans-serif;color:#111;padding:0 0 24px;${lhRule}}
   [dir=rtl],*:lang(ar){font-family:${ARABIC_FONT_FAMILY},sans-serif}
   .page{background:#fff;width:${p.w}px;min-height:${p.h || 'auto'}px;margin:0 auto 16px;padding:${p.pT}px ${p.pR}px ${p.pB}px ${p.pL}px;box-shadow:0 2px 12px rgba(0,0,0,.12);border-radius:2px}
   img{max-width:100%;height:auto}
   table{border-collapse:collapse}
   th,td{border:1px solid #888;padding:4px 8px}
   a{color:#1a73e8}
-  p, li, th, td, h1, h2, h3, h4, h5, h6, blockquote { unicode-bidi: plaintext; }
-  @media print{body{background:#fff;padding:0}.page{box-shadow:none;margin:0;border-radius:0;width:100%;padding:1in}}
-</style></head><body><div class="page">${this.cleanHtml(this.root.innerHTML)}</div></body></html>`
+  p,li,th,td,h1,h2,h3,h4,h5,h6,blockquote{unicode-bidi:plaintext}
+  .preview-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#1e293b;color:#e2e8f0;font:13px/1 system-ui,sans-serif;position:sticky;top:0;z-index:100}
+  .preview-bar span{flex:1;font-weight:500;opacity:.8}
+  .preview-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:none;border-radius:5px;font:13px/1 system-ui,sans-serif;cursor:pointer;background:#3b82f6;color:#fff}
+  .preview-btn:hover{background:#2563eb}
+  .preview-btn svg{flex-shrink:0}
+  @media print{
+    .preview-bar{display:none!important}
+    .preview-pad{padding:0!important}
+    html,body{background:#fff!important;margin:0!important;padding:0!important}
+    .page{box-shadow:none!important;margin:0!important;border-radius:0!important;width:100%!important;min-height:0!important;padding:1in!important}
+  }
+</style></head><body>
+<div class="preview-bar">
+  <span>${title}</span>
+  <button class="preview-btn" onclick="window.print()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Print
+  </button>
+</div>
+<div class="preview-pad" style="padding:24px 0"><div class="page">${this.cleanHtml(this.root.innerHTML)}</div></div>
+</body></html>`
     const blob = new Blob([html], { type: 'text/html' })
     const url = URL.createObjectURL(blob)
     const win = window.open(url, '_blank')

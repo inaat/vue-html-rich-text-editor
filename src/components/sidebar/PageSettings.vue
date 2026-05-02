@@ -60,9 +60,9 @@ watch(docLh, (v) => ctx.page.applyDocLineHeight(v))
   <div class="page-settings">
     <label>Preset
       <select v-model="preset">
-        <option value="letter">Letter (8.5 × 11 in)</option>
-        <option value="a4">A4 (210 × 297 mm)</option>
-        <option value="legal">Legal (8.5 × 14 in)</option>
+        <option value="letter">Letter (816 × 1056 px)</option>
+        <option value="a4">A4 (794 × 1123 px)</option>
+        <option value="legal">Legal (816 × 1344 px)</option>
         <option value="custom">Custom</option>
       </select>
     </label>

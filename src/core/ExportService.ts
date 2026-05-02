@@ -156,11 +156,12 @@ ${ARABIC_FONTS}
   .preview-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:none;border-radius:5px;font:13px/1 system-ui,sans-serif;cursor:pointer;background:#3b82f6;color:#fff}
   .preview-btn:hover{background:#2563eb}
   .preview-btn svg{flex-shrink:0}
+  @page{margin:0}
   @media print{
     .preview-bar{display:none!important}
     .preview-pad{padding:0!important}
     html,body{background:#fff!important;margin:0!important;padding:0!important}
-    .page{box-shadow:none!important;margin:0!important;border-radius:0!important;width:100%!important;min-height:0!important;padding:1in!important}
+    .page{box-shadow:none!important;margin:0!important;border-radius:0!important;width:100%!important;min-height:0!important;padding:${p.pT}px ${p.pR}px ${p.pB}px ${p.pL}px!important}
   }
 </style></head><body>
 <div class="preview-bar">

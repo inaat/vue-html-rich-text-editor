@@ -198,6 +198,24 @@ export interface Labels {
   statusChars: string
   statusPage: string
   statusPages: string
+  // PageSettings
+  presetLabel: string
+  presetLetter: string
+  presetA4: string
+  presetLegal: string
+  presetCustom: string
+  widthPx: string
+  heightPx: string
+  marginTop: string
+  marginRight: string
+  marginBottom: string
+  marginLeft: string
+  lineHeightDoc: string
+  resetToLetter: string
+  // Sidebar section titles
+  sidebarPage: string
+  sidebarStyle: string
+  sidebarDocument: string
 }
 
 export const en: Labels = {
@@ -393,6 +411,22 @@ export const en: Labels = {
   statusChars: 'Characters',
   statusPage: 'page',
   statusPages: 'pages',
+  presetLabel: 'Preset',
+  presetLetter: 'Letter (816 × 1056 px)',
+  presetA4: 'A4 (794 × 1123 px)',
+  presetLegal: 'Legal (816 × 1344 px)',
+  presetCustom: 'Custom',
+  widthPx: 'Width',
+  heightPx: 'Height',
+  marginTop: 'Top',
+  marginRight: 'Right',
+  marginBottom: 'Bottom',
+  marginLeft: 'Left',
+  lineHeightDoc: 'Line-height (whole document)',
+  resetToLetter: 'Reset to Letter / 1in margins',
+  sidebarPage: 'Page',
+  sidebarStyle: 'Style',
+  sidebarDocument: 'Document',
 }
 
 export const ar: Labels = {
@@ -588,6 +622,22 @@ export const ar: Labels = {
   statusChars: 'الأحرف',
   statusPage: 'صفحة',
   statusPages: 'صفحات',
+  presetLabel: 'الإعداد المسبق',
+  presetLetter: 'Letter (816 × 1056 بكسل)',
+  presetA4: 'A4 (794 × 1123 بكسل)',
+  presetLegal: 'Legal (816 × 1344 بكسل)',
+  presetCustom: 'مخصص',
+  widthPx: 'العرض',
+  heightPx: 'الارتفاع',
+  marginTop: 'أعلى',
+  marginRight: 'يمين',
+  marginBottom: 'أسفل',
+  marginLeft: 'يسار',
+  lineHeightDoc: 'تباعد الأسطر (المستند كاملاً)',
+  resetToLetter: 'إعادة ضبط: Letter / هوامش 1 بوصة',
+  sidebarPage: 'الصفحة',
+  sidebarStyle: 'الأنماط',
+  sidebarDocument: 'المستند',
 }
 
 const BUILT_IN: Record<string, Labels> = { en, ar }

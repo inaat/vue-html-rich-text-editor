@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
 import { useEditorContext } from '@/composables/useEditorContext'
+import { useLocale } from '@/composables/useLocale'
 import { PAGE_PRESETS, type PagePreset } from '@/types'
 
 const ctx = useEditorContext()
+const lc = useLocale()
 
 const preset = ref<PagePreset>(ctx.page.current.preset)
 const w = ref(ctx.page.current.w)
@@ -58,25 +60,25 @@ watch(docLh, (v) => ctx.page.applyDocLineHeight(v))
 
 <template>
   <div class="page-settings">
-    <label>Preset
+    <label>{{ lc.presetLabel }}
       <select v-model="preset">
-        <option value="letter">Letter (816 × 1056 px)</option>
-        <option value="a4">A4 (794 × 1123 px)</option>
-        <option value="legal">Legal (816 × 1344 px)</option>
-        <option value="custom">Custom</option>
+        <option value="letter">{{ lc.presetLetter }}</option>
+        <option value="a4">{{ lc.presetA4 }}</option>
+        <option value="legal">{{ lc.presetLegal }}</option>
+        <option value="custom">{{ lc.presetCustom }}</option>
       </select>
     </label>
-    <label>Width <input v-model.number="w" type="number" min="200" max="2000" step="1" @input="onCustomInput"> px</label>
-    <label>Height <input v-model.number="h" type="number" min="200" max="3000" step="1" @input="onCustomInput"> px</label>
+    <label>{{ lc.widthPx }} <input v-model.number="w" type="number" min="200" max="2000" step="1" @input="onCustomInput"> px</label>
+    <label>{{ lc.heightPx }} <input v-model.number="h" type="number" min="200" max="3000" step="1" @input="onCustomInput"> px</label>
     <div class="margin-grid">
-      <label>Top    <input v-model.number="pT" type="number" min="0" max="400" step="1" @input="onCustomInput"> px</label>
-      <label>Right  <input v-model.number="pR" type="number" min="0" max="400" step="1" @input="onCustomInput"> px</label>
-      <label>Bottom <input v-model.number="pB" type="number" min="0" max="400" step="1" @input="onCustomInput"> px</label>
-      <label>Left   <input v-model.number="pL" type="number" min="0" max="400" step="1" @input="onCustomInput"> px</label>
+      <label>{{ lc.marginTop }}    <input v-model.number="pT" type="number" min="0" max="400" step="1" @input="onCustomInput"> px</label>
+      <label>{{ lc.marginRight }}  <input v-model.number="pR" type="number" min="0" max="400" step="1" @input="onCustomInput"> px</label>
+      <label>{{ lc.marginBottom }} <input v-model.number="pB" type="number" min="0" max="400" step="1" @input="onCustomInput"> px</label>
+      <label>{{ lc.marginLeft }}   <input v-model.number="pL" type="number" min="0" max="400" step="1" @input="onCustomInput"> px</label>
     </div>
-    <label>Line-height (whole document)
+    <label>{{ lc.lineHeightDoc }}
       <input v-model="docLh" type="number" min="0.8" max="3" step="0.05" placeholder="1.4">
     </label>
-    <button type="button" class="btn-secondary" @click="reset">Reset to Letter / 1in margins</button>
+    <button type="button" class="btn-secondary" @click="reset">{{ lc.resetToLetter }}</button>
   </div>
 </template>

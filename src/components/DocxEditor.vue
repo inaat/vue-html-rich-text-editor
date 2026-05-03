@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, toRef, watch, provide } from 'vue'
+import { ref, computed, toRef, watch, watchEffect, provide } from 'vue'
 import '@/styles/editor.css'
 import { useEditor } from '@/composables/useEditor'
 import { provideEditorContext } from '@/composables/useEditorContext'
@@ -105,6 +105,12 @@ provideEditorContext(new Proxy({} as any, {
 
 const resolvedLabels = computed(() => resolveLabels(props.lang, props.labels))
 provide(LOCALE_KEY, resolvedLabels)
+
+const RTL_LANGS = new Set(['ar', 'he', 'fa', 'ur'])
+watchEffect(() => {
+  if (!rootRef.value || !props.lang) return
+  rootRef.value.setAttribute('dir', RTL_LANGS.has(props.lang) ? 'rtl' : 'ltr')
+})
 
 function toolbarBottom(): number {
   const el = (toolbarRef.value as any)?.rootEl as HTMLElement | undefined

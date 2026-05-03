@@ -3,10 +3,12 @@ import { ref } from 'vue'
 import PageSettings from '@/components/sidebar/PageSettings.vue'
 import StylePanel from '@/components/sidebar/StylePanel.vue'
 import DocumentMeta from '@/components/sidebar/DocumentMeta.vue'
+import { useLocale } from '@/composables/useLocale'
 import type { DocumentMeta as DocMeta } from '@/types'
 
 defineProps<{ meta: DocMeta }>()
 
+const lc = useLocale()
 const pageOpen = ref(true)
 const styleOpen = ref(true)
 const docOpen = ref(false)
@@ -20,7 +22,7 @@ function chevron() {
   <aside class="sidebar">
     <div class="rp-section">
       <div class="rp-hdr" @click="pageOpen = !pageOpen">
-        <span class="rp-title">Page</span>
+        <span class="rp-title">{{ lc.sidebarPage }}</span>
         <span class="rp-chevron" :class="{ open: pageOpen }" v-html="chevron()" />
       </div>
       <div v-if="pageOpen" class="rp-body">
@@ -30,7 +32,7 @@ function chevron() {
 
     <div class="rp-section">
       <div class="rp-hdr" @click="styleOpen = !styleOpen">
-        <span class="rp-title">Style</span>
+        <span class="rp-title">{{ lc.sidebarStyle }}</span>
         <span class="rp-chevron" :class="{ open: styleOpen }" v-html="chevron()" />
       </div>
       <div v-if="styleOpen" class="rp-body">
@@ -40,7 +42,7 @@ function chevron() {
 
     <div class="rp-section">
       <div class="rp-hdr" @click="docOpen = !docOpen">
-        <span class="rp-title">Document</span>
+        <span class="rp-title">{{ lc.sidebarDocument }}</span>
         <span class="rp-chevron" :class="{ open: docOpen }" v-html="chevron()" />
       </div>
       <div v-if="docOpen" class="rp-body">

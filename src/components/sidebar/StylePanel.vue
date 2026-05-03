@@ -12,6 +12,7 @@ const breadcrumb = ref<HTMLElement[]>([])
 const active = ref<HTMLElement | null>(null)
 const pinned = ref<HTMLElement | null>(null)
 const allProps = ref<Array<{ name: string; value: string; dirty: boolean }>>([])
+const attrs = ref<Array<{ name: string; value: string }>>([])
 const filter = ref('')
 const showAll = ref(false)
 const newName = ref('')
@@ -29,6 +30,8 @@ const filteredProps = computed(() => {
   if (!q) return allProps.value
   return allProps.value.filter((r) => r.name.includes(q))
 })
+
+const inlineStyles = computed(() => allProps.value.filter(r => r.dirty))
 
 function findTarget(): HTMLElement | null {
   const sel = window.getSelection()
@@ -66,8 +69,33 @@ function buildBreadcrumb(el: HTMLElement | null) {
   breadcrumb.value = chain
 }
 
+function readAttrs(el: HTMLElement | null) {
+  if (!el) { attrs.value = []; return }
+  const result: Array<{ name: string; value: string }> = []
+  for (let i = 0; i < el.attributes.length; i++) {
+    const a = el.attributes[i]
+    if (a.name !== 'style') result.push({ name: a.name, value: a.value })
+  }
+  attrs.value = result
+}
+
+function removeAttr(name: string) {
+  if (!active.value) return
+  active.value.removeAttribute(name)
+  readAttrs(active.value)
+  ctx.scheduleSave()
+}
+
+function removeProp(name: string) {
+  if (!active.value) return
+  active.value.style.removeProperty(name)
+  renderAll(active.value)
+  ctx.scheduleSave()
+}
+
 function readPanel(el: HTMLElement | null) {
   buildBreadcrumb(el)
+  readAttrs(el)
   if (!el) {
     values.value = {}
     colors.value = { borderColor: '#000000', backgroundColor: '#ffffff', color: '#000000' }
@@ -149,6 +177,7 @@ function pickFromBreadcrumb(node: HTMLElement) {
   pinned.value = node
   readPanel(node)
   renderAll(node)
+  readAttrs(node)
 }
 
 const BORDER_WIDTH_TO_STYLE: Record<string, string> = {
@@ -291,37 +320,69 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="style-panel">
+    <!-- Document direction -->
     <div class="sp-doc-dir">
       <span class="sp-tag-label">{{ lc.docDirection }}</span>
       <button type="button" class="sp-dir-btn" @mousedown.prevent @click="setDocumentDir('ltr')">{{ lc.ltr }}</button>
       <button type="button" class="sp-dir-btn" @mousedown.prevent @click="setDocumentDir('rtl')">{{ lc.rtl }}</button>
     </div>
+
+    <!-- Selected element -->
     <div class="sp-tag-row">
       <span class="sp-tag-label">{{ lc.selectedElement }}</span>
       <span class="sp-tag">{{ tagLabel }}</span>
       <button type="button" class="sp-dir-btn" :title="lc.setLtrOnElement" :disabled="!active" @mousedown.prevent @click="setElementDir('ltr')">{{ lc.ltr }}</button>
       <button type="button" class="sp-dir-btn" :title="lc.setRtlOnElement" :disabled="!active" @mousedown.prevent @click="setElementDir('rtl')">{{ lc.rtl }}</button>
-      <button type="button" class="sp-child-btn" :title="lc.insertChildEl" :disabled="!active" @mousedown.prevent @click="insertChild">{{ lc.addChildBtn }}</button>
-      <button type="button" class="sp-del" :title="lc.deleteElement" @click="deleteEl">🗑</button>
     </div>
+    <div class="sp-el-actions">
+      <button type="button" class="sp-child-btn" :title="lc.insertChildEl" :disabled="!active" @mousedown.prevent @click="insertChild">{{ lc.addChildBtn }}</button>
+      <button type="button" class="sp-del" :title="lc.deleteElement" :disabled="!active" @click="deleteEl">✕</button>
+    </div>
+
+    <!-- Breadcrumb -->
     <div class="sp-breadcrumb">
       <span v-if="!breadcrumb.length">{{ lc.clickIntoEditor }}</span>
-      <span
-        v-for="(node, i) in breadcrumb"
-        :key="i"
-        class="sp-crumb-wrap"
-      >
+      <span v-for="(node, i) in breadcrumb" :key="i" class="sp-crumb-wrap">
         <span v-if="i > 0" class="crumb-sep">›</span>
-        <button
-          type="button"
-          class="crumb"
-          :class="{ current: node === active }"
-          @mousedown.prevent
-          @click="pickFromBreadcrumb(node)"
-        >{{ node.tagName.toLowerCase() }}</button>
+        <button type="button" class="crumb" :class="{ current: node === active }" @mousedown.prevent @click="pickFromBreadcrumb(node)">{{ node.tagName.toLowerCase() }}</button>
       </span>
     </div>
 
+    <!-- Attributes -->
+    <details>
+      <summary>
+        {{ lc.attributesSection }}
+        <span v-if="attrs.length" class="sp-count-badge">{{ attrs.length }}</span>
+      </summary>
+      <div v-if="!active" class="sp-empty-note">{{ lc.clickIntoEditor }}</div>
+      <div v-else-if="!attrs.length" class="sp-empty-note">—</div>
+      <div v-else class="sp-kv-list">
+        <div v-for="a in attrs" :key="a.name" class="sp-kv-row">
+          <span class="sp-kv-name" :title="a.name">{{ a.name }}</span>
+          <span class="sp-kv-val" :title="a.value">{{ a.value || '""' }}</span>
+          <button type="button" class="sp-rm-btn" title="Remove attribute" @click="removeAttr(a.name)">✕</button>
+        </div>
+      </div>
+    </details>
+
+    <!-- Inline styles -->
+    <details open>
+      <summary>
+        {{ lc.inlineStylesSection }}
+        <span v-if="inlineStyles.length" class="sp-count-badge">{{ inlineStyles.length }}</span>
+      </summary>
+      <div v-if="!active" class="sp-empty-note">{{ lc.clickIntoEditor }}</div>
+      <div v-else-if="!inlineStyles.length" class="sp-empty-note">—</div>
+      <div v-else class="sp-kv-list">
+        <div v-for="row in inlineStyles" :key="row.name" class="sp-kv-row">
+          <span class="sp-kv-name" :title="row.name">{{ row.name }}</span>
+          <input class="sp-kv-input" :value="row.value" @input="setRaw(row.name, $event)" />
+          <button type="button" class="sp-rm-btn" title="Remove property" @click="removeProp(row.name)">✕</button>
+        </div>
+      </div>
+    </details>
+
+    <!-- Size -->
     <details open>
       <summary>{{ lc.sizeSection }}</summary>
       <div class="sp-row">
@@ -334,6 +395,7 @@ onBeforeUnmount(() => {
       </div>
     </details>
 
+    <!-- Padding -->
     <details>
       <summary>{{ lc.paddingSection }}</summary>
       <div class="sp-grid">
@@ -344,6 +406,7 @@ onBeforeUnmount(() => {
       </div>
     </details>
 
+    <!-- Margin -->
     <details>
       <summary>{{ lc.marginSection }}</summary>
       <div class="sp-grid">
@@ -354,6 +417,7 @@ onBeforeUnmount(() => {
       </div>
     </details>
 
+    <!-- Border -->
     <details>
       <summary>{{ lc.borderSection }}</summary>
       <div class="sp-grid">
@@ -379,6 +443,7 @@ onBeforeUnmount(() => {
       <label class="sp-full">Radius <input :value="values.borderRadius" @input="onFieldInput('borderRadius', $event)" /></label>
     </details>
 
+    <!-- Color -->
     <details>
       <summary>{{ lc.colorSection }}</summary>
       <div class="sp-row">
@@ -387,17 +452,13 @@ onBeforeUnmount(() => {
       </div>
     </details>
 
+    <!-- All computed properties -->
     <details>
       <summary>{{ lc.allPropsSection }}</summary>
       <input v-model="filter" type="search" class="sp-filter" :placeholder="lc.filterPropsPlaceholder">
       <label class="sp-toggle"><input v-model="showAll" type="checkbox" @change="renderAll(active)"> {{ lc.showEveryProp }}</label>
       <div class="sp-all">
-        <div
-          v-for="row in filteredProps"
-          :key="row.name"
-          class="sp-prop"
-          :class="{ dirty: row.dirty }"
-        >
+        <div v-for="row in filteredProps" :key="row.name" class="sp-prop" :class="{ dirty: row.dirty }">
           <span class="pname" :title="row.name">{{ row.name }}</span>
           <input :value="row.value" @input="setRaw(row.name, $event)" />
         </div>
@@ -414,47 +475,155 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/* ── top rows ── */
 .sp-doc-dir,
 .sp-tag-row {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 0;
+  flex-wrap: nowrap;
+  gap: 3px;
+  padding: 4px 2px;
+}
+.sp-tag-label {
+  font-size: 11px;
+  color: #6b7280;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.sp-tag {
+  font-size: 11px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-weight: 600;
+  min-width: 18px;
+  text-align: center;
+  flex-shrink: 0;
 }
 .sp-dir-btn {
   font-size: 11px;
-  padding: 1px 6px;
+  padding: 1px 5px;
   border: 1px solid #d0d5dd;
   border-radius: 4px;
   background: #f9fafb;
   cursor: pointer;
-  line-height: 1.6;
+  line-height: 1.5;
+  color: #374151;
+  flex-shrink: 0;
 }
 .sp-dir-btn:hover {
-  background: #e8f5ee;
-  border-color: #0d6b45;
-  color: #0d6b45;
+  background: #ecfdf5;
+  border-color: #059669;
+  color: #065f46;
 }
-.sp-dir-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
+.sp-dir-btn:disabled { opacity: 0.35; cursor: default; }
 .sp-child-btn {
   font-size: 11px;
-  padding: 1px 6px;
-  border: 1px solid #6366f1;
+  padding: 1px 5px;
+  border: 1px solid #818cf8;
   border-radius: 4px;
   background: #eef2ff;
   color: #4338ca;
   cursor: pointer;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+.sp-child-btn:hover { background: #e0e7ff; border-color: #4338ca; }
+.sp-child-btn:disabled { opacity: 0.35; cursor: default; }
+.sp-del {
+  font-size: 11px;
+  padding: 1px 5px;
+  border: 1px solid #fca5a5;
+  border-radius: 4px;
+  background: #fef2f2;
+  color: #dc2626;
+  cursor: pointer;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+.sp-del:hover { background: #fee2e2; border-color: #ef4444; }
+.sp-del:disabled { opacity: 0.35; cursor: default; }
+.sp-el-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0 4px;
+}
+
+/* ── count badge inside summary ── */
+.sp-count-badge {
+  font-size: 10px;
+  font-weight: 600;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-radius: 8px;
+  padding: 0 5px;
+  margin-left: 4px;
   line-height: 1.6;
 }
-.sp-child-btn:hover {
-  background: #e0e7ff;
-  border-color: #4338ca;
+
+/* ── empty state ── */
+.sp-empty-note {
+  font-size: 11px;
+  color: #9ca3af;
+  padding: 6px 10px;
+  border-top: 1px solid #f0f2f5;
 }
-.sp-child-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
+
+/* ── key/value list (attrs + inline styles) ── */
+.sp-kv-list {
+  border-top: 1px solid #f0f2f5;
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.sp-kv-row {
+  display: grid;
+  grid-template-columns: 96px 1fr 20px;
+  gap: 4px;
+  align-items: center;
+}
+.sp-kv-name {
+  font: 10.5px ui-monospace, Menlo, Consolas, monospace;
+  color: #2563eb;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sp-kv-val {
+  font: 10.5px ui-monospace, Menlo, Consolas, monospace;
+  color: #374151;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sp-kv-input {
+  min-width: 0;
+  padding: 2px 4px;
+  border: 1px solid #93c5fd;
+  border-radius: 3px;
+  background: #eff6ff;
+  font: 10.5px ui-monospace, Menlo, Consolas, monospace;
+}
+.sp-rm-btn {
+  font-size: 10px;
+  line-height: 1;
+  padding: 1px 3px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+}
+.sp-rm-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
 }
 </style>

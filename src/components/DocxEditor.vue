@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, toRef, watch, watchEffect, provide } from 'vue'
+import { ref, computed, toRef, watch, watchEffect, provide, onUnmounted } from 'vue'
 import '@/styles/editor.css'
 import { useEditor } from '@/composables/useEditor'
 import { provideEditorContext } from '@/composables/useEditorContext'
@@ -10,9 +10,10 @@ import { useImageTools } from '@/composables/useImageTools'
 import { useShortcuts } from '@/composables/useShortcuts'
 import { formatBytes } from '@/core/Format'
 import { DirectionService } from '@/core/DirectionService'
-import type { DocumentMeta, MergeFieldCategory } from '@/types'
+import type { DocumentMeta, MergeFieldCategory, FontDefinition } from '@/types'
 import { LOCALE_KEY, resolveLabels } from '@/core/Locale'
 import type { Labels } from '@/core/Locale'
+import { FONTS_KEY } from '@/composables/useFormatting'
 import { EMPTY_META } from '@/types'
 import Toolbar from '@/components/toolbar/Toolbar.vue'
 import EditorPane from '@/components/EditorPane.vue'
@@ -32,6 +33,7 @@ const props = withDefaults(defineProps<{
   fields?: MergeFieldCategory[]
   lang?: string
   labels?: Partial<Labels>
+  fonts?: FontDefinition[]
 }>(), { modelValue: '' })
 
 const emit = defineEmits<{
@@ -105,6 +107,23 @@ provideEditorContext(new Proxy({} as any, {
 
 const resolvedLabels = computed(() => resolveLabels(props.lang, props.labels))
 provide(LOCALE_KEY, resolvedLabels)
+
+provide(FONTS_KEY, props.fonts ?? null)
+
+const injectedFontLinks: HTMLLinkElement[] = []
+watchEffect(() => {
+  injectedFontLinks.forEach(l => l.remove())
+  injectedFontLinks.length = 0
+  for (const font of props.fonts ?? []) {
+    if (!font.url) continue
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = font.url
+    document.head.appendChild(link)
+    injectedFontLinks.push(link)
+  }
+})
+onUnmounted(() => { injectedFontLinks.forEach(l => l.remove()) })
 
 const RTL_LANGS = new Set(['ar', 'he', 'fa', 'ur'])
 watchEffect(() => {

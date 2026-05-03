@@ -66,8 +66,12 @@ const fields: MergeFieldCategory[] = [
       <button @click="saveToDatabase" :disabled="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
     </div>
     <DocxEditor v-model="html" :fields="fields" apiBase="http://localhost:3001"
-     lang="ar" 
-    
+     lang="en" 
+      :fonts="[
+    { label: 'Roboto',        value: 'Roboto',        url: 'https://fonts.googleapis.com/css2?family=Roboto&display=swap' },
+    { label: 'Noto Kufi Arabic', value: 'Noto Kufi Arabic', url: 'https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic&display=swap' },
+    { label: 'My Local Font', value: 'MyLocalFont' },
+    ]"
     />
   </div>
 </template>

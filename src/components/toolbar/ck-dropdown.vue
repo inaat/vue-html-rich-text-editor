@@ -9,6 +9,7 @@ export interface DropdownItem {
   arrow?: boolean
   style?: string
   separator?: boolean
+  active?: boolean
   children?: DropdownItem[]
   onClick?: () => void
 }
@@ -116,7 +117,7 @@ defineExpose({ openAt })
             v-else
             type="button"
             class="tb-menu-item"
-            :class="{ 'tb-menu-item--active': activeLabel === item.label }"
+            :class="{ 'tb-menu-item--active': activeLabel === item.label || item.active }"
             @mousedown.prevent
             @click="select(item)"
           >
@@ -141,6 +142,7 @@ defineExpose({ openAt })
         :key="child.label"
         type="button"
         class="tb-menu-item"
+        :class="{ 'tb-menu-item--active': child.active }"
         :style="child.style"
         @mousedown.prevent
         @click="selectSub(child)"

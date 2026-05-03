@@ -216,6 +216,8 @@ export interface Labels {
   sidebarPage: string
   sidebarStyle: string
   sidebarDocument: string
+  inlineStylesSection: string
+  attributesSection: string
 }
 
 export const en: Labels = {
@@ -427,6 +429,8 @@ export const en: Labels = {
   sidebarPage: 'Page',
   sidebarStyle: 'Style',
   sidebarDocument: 'Document',
+  inlineStylesSection: 'Inline Styles',
+  attributesSection: 'Attributes',
 }
 
 export const ar: Labels = {
@@ -638,6 +642,8 @@ export const ar: Labels = {
   sidebarPage: 'الصفحة',
   sidebarStyle: 'الأنماط',
   sidebarDocument: 'المستند',
+  inlineStylesSection: 'الأنماط المضمّنة',
+  attributesSection: 'السمات',
 }
 
 const BUILT_IN: Record<string, Labels> = { en, ar }

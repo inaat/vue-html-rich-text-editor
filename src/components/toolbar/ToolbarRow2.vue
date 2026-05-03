@@ -133,8 +133,8 @@ function pickOrdered(ev: MouseEvent) {
 }
 
 const basicItems = computed<DropdownItem[]>(() => [
-  { label: lc.value.fontSizeLabel,     icon: 'font_size',     children: fontSizeChildren,   onClick: () => {} },
-  { label: lc.value.fontFamilyLabel,   icon: 'font_family',   children: fontFamilyChildren, onClick: () => {} },
+  { label: lc.value.fontSizeLabel,     icon: 'font_size',     children: fontSizeChildren.value,   onClick: () => {} },
+  { label: lc.value.fontFamilyLabel,   icon: 'font_family',   children: fontFamilyChildren.value, onClick: () => {} },
   { label: lc.value.fontColorLabel,    icon: 'font_color',    arrow: true, onClick: () => colorPickerEl.value?.openAt(lastPickerRect.left, lastPickerRect.bottom + 2, 'foreColor') },
   { label: lc.value.highlightLabel,    icon: 'remove_color',  arrow: true, onClick: () => highlightPickerEl.value?.openAt(lastPickerRect.left, lastPickerRect.bottom + 2) },
   { label: lc.value.italicLabel,       icon: 'italic',        shortcut: 'Ctrl+I',       onClick: () => applyBasic('italic') },

@@ -78,6 +78,7 @@ const modelValue = toRef(props, 'modelValue')
 const { rootRef, sourceRef, context, ready } = useEditor({
   modelValue,
   apiBase: props.apiBase,
+  fonts: toRef(props, 'fonts'),
   onChange(html) {
     emit('update:modelValue', html)
     emit('change', html)

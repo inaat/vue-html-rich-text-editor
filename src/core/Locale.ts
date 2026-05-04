@@ -118,6 +118,7 @@ export interface Labels {
   fileExportWord: string
   fileExportPdf: string
   filePreview: string
+  filePrint: string
   editUndo: string
   editRedo: string
   editCut: string
@@ -335,6 +336,7 @@ export const en: Labels = {
   fileExportWord: 'Export to Word',
   fileExportPdf: 'Export to PDF',
   filePreview: 'Preview in new tab',
+  filePrint: 'Print…',
   editUndo: 'Undo',
   editRedo: 'Redo',
   editCut: 'Cut',
@@ -548,6 +550,7 @@ export const ar: Labels = {
   fileExportWord: 'تصدير إلى Word',
   fileExportPdf: 'تصدير إلى PDF',
   filePreview: 'معاينة في نافذة جديدة',
+  filePrint: 'طباعة…',
   editUndo: 'تراجع',
   editRedo: 'إعادة',
   editCut: 'قص',

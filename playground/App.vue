@@ -10,6 +10,7 @@ async function saveToDatabase() {
   console.log('Saving to database…')
   if (saving.value) return
   saving.value = true
+  console.log('Content to save:', JSON.stringify({ content: html.value }))
   try {
     await fetch('http://localhost:3001/documentssave/1', {
       method: 'PUT',

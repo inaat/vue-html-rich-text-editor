@@ -1,4 +1,4 @@
-import type { PageSettings } from '@/types'
+import type { PageSettings, FontDefinition } from '@/types'
 
 const ARABIC_FONTS = `
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -7,12 +7,25 @@ const ARABIC_FONTS = `
 
 const ARABIC_FONT_FAMILY = `'IBM Plex Arabic', 'Noto Sans Arabic', 'Cairo', 'Amiri'`
 
+const toIn = (px: number) => (px / 96).toFixed(4) + 'in'
+
 // Minimal type for the dynamically-loaded html2pdf.js bundle
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type H2P = () => any
 
 export class ExportService {
-  constructor(private root: HTMLElement) {}
+  constructor(
+    private root: HTMLElement,
+    private getFonts: () => FontDefinition[] = () => []
+  ) {}
+
+  private fontLinks(): string {
+    const custom = this.getFonts()
+      .filter(f => f.url)
+      .map(f => `  <link rel="stylesheet" href="${f.url}">`)
+      .join('\n')
+    return custom ? `${ARABIC_FONTS}\n${custom}` : ARABIC_FONTS
+  }
 
   cleanHtml(rootHtml: string): string {
     const tmp = document.createElement('div')
@@ -28,7 +41,6 @@ export class ExportService {
   toWordDoc(filename: string): void {
     const html = `<!doctype html><html><head><meta charset="utf-8">${ARABIC_FONTS}<style>
   body{font-family:Calibri,Arial,${ARABIC_FONT_FAMILY},sans-serif}
-  table{border-collapse:collapse} th,td{border:1px solid #888;padding:4px 8px}
   [dir=rtl],*:lang(ar){font-family:${ARABIC_FONT_FAMILY},sans-serif}
   </style></head><body>${this.cleanHtml(this.root.innerHTML)}</body></html>`
     const blob = new Blob(['﻿', html], { type: 'application/msword' })
@@ -39,7 +51,7 @@ export class ExportService {
     const html = this.root.innerHTML
     const doc = `<!doctype html>
 <html><head><meta charset="utf-8"><title>${filename}</title>
-${ARABIC_FONTS}
+${this.fontLinks()}
 <style>
   @page { size: A4; margin: 1in; }
   html, body { background: #f5f6f8; }
@@ -47,9 +59,6 @@ ${ARABIC_FONTS}
   [dir=rtl], *:lang(ar) { font-family: ${ARABIC_FONT_FAMILY}, sans-serif; }
   .page { background: #fff; width: 816px; max-width: 100%; margin: 0 auto; padding: 96px;
     box-shadow: 0 1px 3px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.06); }
-  table { border-collapse: collapse; margin: 1em 0; width: 100%; table-layout: auto; }
-  th, td { border: 1px solid #d0d4da; padding: 8px 12px; vertical-align: top; overflow-wrap: anywhere; }
-  thead th { background: #f5f6f8; }
   blockquote { margin: 1em 0; padding: .4em 1em; border-left: 3px solid #d0d4da; color: #4b5563; }
   pre { background: #0f172a; color: #e2e8f0; padding: 12px; border-radius: 6px; overflow-x: auto;
         font: 13px/1.5 ui-monospace, Menlo, Consolas, monospace; }
@@ -86,12 +95,13 @@ ${ARABIC_FONTS}
 
     // Wrap with full page width + padding so RTL content can't overflow left of the capture area
     const htmlContent =
-      `<div style="width:${p.w}px;padding:${p.pT}px ${p.pR}px ${p.pB}px ${p.pL}px;` +
-      `font:11pt/1.4 Calibri,'Segoe UI',Arial,${ARABIC_FONT_FAMILY},sans-serif;color:#111;background:#fff;box-sizing:border-box">` +
+      `<!doctype html><html><head><meta charset="utf-8">` +
+      this.fontLinks() +
       `<style>` +
+      `*,*::before,*::after{box-sizing:border-box}` +
+      `html,body{margin:0;padding:0;background:#fff}` +
+      `body{font:11pt/1.4 Calibri,'Segoe UI',Arial,${ARABIC_FONT_FAMILY},sans-serif;color:#111}` +
       `img{max-width:100%;height:auto}` +
-      `table{border-collapse:collapse;width:100%}` +
-      `th,td{border:1px solid #888;padding:4px 8px;vertical-align:top}` +
       `blockquote{margin:1em 0;padding:.4em 1em;border-left:3px solid #d0d4da;color:#4b5563}` +
       `pre{background:#0f172a;color:#e2e8f0;padding:12px;border-radius:6px;font:13px/1.5 monospace}` +
       `code{background:#f0f2f5;padding:1px 4px;border-radius:3px}` +
@@ -101,9 +111,10 @@ ${ARABIC_FONTS}
       `.pagebreak{page-break-after:always;height:0;margin:0}` +
       `.pagebreak .pb-label,.pagebreak .pb-delete{display:none}` +
       `.merge-field{background:#dbeafe;padding:0 2px;border-radius:2px}` +
-      `</style>` +
+      `</style></head>` +
+      `<body><div style="width:${p.w}px;padding:${p.pT}px ${p.pR}px ${p.pB}px ${p.pL}px">` +
       this.cleanHtml(this.root.innerHTML) +
-      `</div>`
+      `</div></body></html>`
 
     await h2p().set({
       margin:      0,
@@ -142,8 +153,10 @@ ${ARABIC_FONTS}
     const docLh = (document.getElementById('docLineHeight') as HTMLInputElement | null)?.value || ''
     const lhRule = docLh ? `line-height:${docLh};` : ''
     const title = (filename || 'Preview') + ' — Preview'
+    const rootDir = this.root.getAttribute('dir') || ''
+    const dirAttr = rootDir ? ` dir="${rootDir}"` : ''
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
-${ARABIC_FONTS}
+${this.fontLinks()}
 <style>
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;background:#e5e7eb}
@@ -151,10 +164,13 @@ ${ARABIC_FONTS}
   [dir=rtl],*:lang(ar){font-family:${ARABIC_FONT_FAMILY},sans-serif}
   .page{background:#fff;width:${p.w}px;min-height:${p.h || 'auto'}px;margin:0 auto 16px;padding:${p.pT}px ${p.pR}px ${p.pB}px ${p.pL}px;box-shadow:0 2px 12px rgba(0,0,0,.12);border-radius:2px}
   img{max-width:100%;height:auto}
-  table{border-collapse:collapse}
-  th,td{border:1px solid #888;padding:4px 8px}
+  
   a{color:#1a73e8}
   p,li,th,td,h1,h2,h3,h4,h5,h6,blockquote{unicode-bidi:plaintext}
+  blockquote{margin:1em 0;padding:.4em 1em;border-left:3px solid #d0d4da;color:#4b5563}
+  pre{background:#0f172a;color:#e2e8f0;padding:12px;border-radius:6px;font:13px/1.5 monospace}
+  code{background:#f0f2f5;padding:1px 4px;border-radius:3px}
+  pre code{background:transparent;padding:0}
   .preview-bar{display:flex;align-items:center;gap:8px;padding:10px 16px;background:#1e293b;color:#e2e8f0;font:13px/1 system-ui,sans-serif;position:sticky;top:0;z-index:100}
   .preview-bar span{flex:1;font-weight:500;opacity:.8}
   .preview-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:none;border-radius:5px;font:13px/1 system-ui,sans-serif;cursor:pointer;background:#3b82f6;color:#fff}
@@ -162,7 +178,7 @@ ${ARABIC_FONTS}
   .preview-btn svg{flex-shrink:0}
   .pagebreak{page-break-after:always;break-after:page;margin:24px 0;height:0;border-top:2px dashed #c4c4c4;position:relative}
   .pagebreak .pb-label,.pagebreak .pb-delete{display:none}
-  @page{margin:0}
+  @page{size:${toIn(p.w)} ${p.h ? toIn(p.h) : 'auto'};margin:0}
   @media print{
     .preview-bar{display:none!important}
     .preview-pad{padding:0!important}
@@ -178,7 +194,7 @@ ${ARABIC_FONTS}
     Print
   </button>
 </div>
-<div class="preview-pad" style="padding:24px 0"><div class="page">${this.cleanHtml(this.root.innerHTML)}</div></div>
+<div class="preview-pad" style="padding:24px 0"><div class="page"${dirAttr}>${this.cleanHtml(this.root.innerHTML)}</div></div>
 </body></html>`
     const blob = new Blob([html], { type: 'text/html' })
     const url = URL.createObjectURL(blob)
@@ -186,6 +202,44 @@ ${ARABIC_FONTS}
     if (!win) {
       URL.revokeObjectURL(url)
       throw new Error('Popup blocked — allow popups to use Preview')
+    }
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+  }
+
+  print(filename: string, page: PageSettings | null): void {
+    const p = page ?? { w: 816, h: 1056, pT: 96, pR: 96, pB: 96, pL: 96, preset: 'letter' as const }
+    const docLh = (document.getElementById('docLineHeight') as HTMLInputElement | null)?.value || ''
+    const lhRule = docLh ? `line-height:${docLh};` : ''
+    const title = (filename || 'Print') + ' — Print'
+    const rootDir = this.root.getAttribute('dir') || ''
+    const dirAttr = rootDir ? ` dir="${rootDir}"` : ''
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
+${this.fontLinks()}
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;background:#fff}
+  body{font-family:Calibri,Arial,${ARABIC_FONT_FAMILY},sans-serif;color:#111;${lhRule}}
+  [dir=rtl],*:lang(ar){font-family:${ARABIC_FONT_FAMILY},sans-serif}
+  .page{background:#fff;width:${p.w}px;min-height:${p.h || 'auto'}px;margin:0 auto;padding:${p.pT}px ${p.pR}px ${p.pB}px ${p.pL}px}
+  img{max-width:100%;height:auto}
+  a{color:#1a73e8}
+  p,li,th,td,h1,h2,h3,h4,h5,h6,blockquote{unicode-bidi:plaintext}
+  blockquote{margin:1em 0;padding:.4em 1em;border-left:3px solid #d0d4da;color:#4b5563}
+  pre{background:#0f172a;color:#e2e8f0;padding:12px;border-radius:6px;font:13px/1.5 monospace}
+  code{background:#f0f2f5;padding:1px 4px;border-radius:3px}
+  .pagebreak{page-break-after:always;break-after:page;height:0;margin:0;border:0}
+  .pagebreak .pb-label,.pagebreak .pb-delete{display:none}
+  @page{size:${toIn(p.w)} ${p.h ? toIn(p.h) : 'auto'};margin:0}
+</style></head>
+<body><div class="page"${dirAttr}>${this.cleanHtml(this.root.innerHTML)}</div>
+<script>window.onload=function(){window.print();window.onafterprint=function(){window.close()}}<\/script>
+</body></html>`
+    const blob = new Blob([html], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    const win = window.open(url, '_blank')
+    if (!win) {
+      URL.revokeObjectURL(url)
+      throw new Error('Popup blocked — allow popups to use Print')
     }
     setTimeout(() => URL.revokeObjectURL(url), 60_000)
   }

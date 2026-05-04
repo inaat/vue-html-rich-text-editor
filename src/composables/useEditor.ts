@@ -1,4 +1,5 @@
 import { ref, onMounted, onBeforeUnmount, watch, shallowRef, type Ref } from 'vue'
+import type { FontDefinition } from '@/types'
 import { SelectionService } from '@/core/SelectionService'
 import { HistoryService } from '@/core/HistoryService'
 import { ExecCommandEngine } from '@/core/ExecCommandEngine'
@@ -17,6 +18,7 @@ import type { EditorContext } from '@/composables/useEditorContext'
 export interface UseEditorOptions {
   modelValue: Ref<string>
   apiBase?: string
+  fonts?: Ref<FontDefinition[] | undefined>
   onChange(html: string): void
   onStatus?(msg: string, kind: '' | 'ok' | 'err'): void
 }
@@ -52,7 +54,7 @@ export function useEditor(options: UseEditorOptions): UseEditorReturn {
     const table = new TableService(selection)
     const image = new ImageService(root)
     const paint = new PaintService(selection)
-    const exportSvc = new ExportService(root)
+    const exportSvc = new ExportService(root, () => options.fonts?.value ?? [])
     const importSvc = new ImportService(
       root,
       options.apiBase ?? (location.origin.startsWith('http') ? '' : 'http://localhost:3001')

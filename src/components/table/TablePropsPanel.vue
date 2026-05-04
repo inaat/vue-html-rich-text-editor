@@ -45,7 +45,11 @@ watch(() => props.cell, (c) => {
 
 function applyBorder() {
   for (const c of targets()) {
-    c.style.border = `${parseLen(borderW.value) || '1px'} ${borderStyle.value || 'solid'} ${borderColor.value || '#000'}`
+    if (borderStyle.value === 'none') {
+      c.style.border = 'none'
+    } else {
+      c.style.border = `${parseLen(borderW.value) || '1px'} ${borderStyle.value || 'solid'} ${borderColor.value || '#000'}`
+    }
   }
   ctx.scheduleSave()
 }

@@ -84,7 +84,8 @@ function open(key: MenuKey, ev: MouseEvent) {
         { label: l.fileExportWord, onClick: () => ctx.export.toWordDoc(ctx.getFilename()) },
         { label: l.fileExportPdf, onClick: () => ctx.export.toPdf(ctx.page.current) },
         { separator: true },
-        { label: l.filePreview, onClick: () => ctx.export.preview(ctx.getFilename(), ctx.page.current) }
+        { label: l.filePreview, onClick: () => ctx.export.preview(ctx.getFilename(), ctx.page.current) },
+        { label: l.filePrint, onClick: () => ctx.export.print(ctx.getFilename(), ctx.page.current) }
       ]
       case 'edit': return [
         { label: l.editUndo, shortcut: 'Ctrl+Z', onClick: () => exec('undo') },

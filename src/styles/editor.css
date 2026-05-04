@@ -898,12 +898,6 @@ body {
   }
 }
 
-/* Imported HTML (Word .htm exports): natural block flow so screen matches print.
-   Let Word's own <style> block control borders/padding/widths via the cascade. */
-.editor .imported-html {
-  display: block;
-}
-.editor .imported-html > * { max-width: 100%; }
 
 /* Editor's default table styling lives in a layer so Word's unlayered
    <style> block (injected by HTML import) wins over our defaults.
@@ -916,6 +910,14 @@ body {
     overflow-wrap: anywhere;
   }
   .editor thead th { background: #f5f6f8; }
+  /* Imported HTML: reset cell borders/padding so original no-border tables stay border-free.
+     Word's own <style> block (injected on import, outside any layer) wins over this layer
+     and restores borders on Word tables that actually have them. */
+  .editor .imported-html th,
+  .editor .imported-html td {
+    border: none;
+    padding: 0;
+  }
 }
 .editor td:focus-within, .editor th:focus-within { outline: 2px solid #93c5fd; outline-offset: -2px; }
 
